@@ -175,21 +175,10 @@ export async function runTUI(): Promise<void> {
     }
 
     if (mode === 'init' || mode === 'uninstall' || mode === 'update') {
-      if (mode === 'update') {
-        console.log('');
-        await updateCommand('.', {});
-        console.log('');
-      } else {
-        const dir = await text({ message: '대상 디렉토리', placeholder: '.', defaultValue: '.' });
-        if (isCancel(dir)) continue;
-        const targetDir = path.resolve(resolveDir(dir));
-        if (!fs.existsSync(targetDir)) {
-          log.error(`디렉토리 없음: ${targetDir}`);
-          continue;
-        }
-        console.log('');
-        await runOne(mode, targetDir);
-      }
+      console.log('');
+      await (mode === 'update'
+        ? updateCommand('.', {})
+        : runOne(mode, process.cwd()));
       console.log('');
       const again = await select({
         message: '계속하시겠습니까?',
