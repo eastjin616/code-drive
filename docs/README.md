@@ -6,15 +6,17 @@
 
 - **Version:** 0.1.0
 - **Language:** typescript
-- **Source files:** 14
+- **Source files:** 15
 - **Entry points:** vitest.config.ts
 
 ## Dependencies
 
+- `@clack/prompts`
 - `chalk`
 - `chokidar`
 - `commander`
 - `glob`
+- `ora`
 - `typescript`
 
 ## Public API — Functions
@@ -25,7 +27,8 @@
 | `add` | `tests/fixtures/sample-project/src/index.ts:6` | a: number, b: number | number |
 | `subtract` | `tests/fixtures/sample-project/src/index.ts:11` | a: number, b: number | — |
 | `greet` | `tests/fixtures/sample-project/src/index.ts:21` | name: string | string |
-| `runCLI` | `src/cli.ts:12` | argv: string[] = process.argv | void |
+| `runTUI` | `src/tui.ts:33` |  | Promise<void> |
+| `runCLI` | `src/cli.ts:13` | argv: string[] = process.argv | void |
 | `generateReadmeDocs` | `src/core/generator.ts:21` | project: ProjectInfo, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[], annotations: CodeAnnotation[] | string |
 | `generateApiDocs` | `src/core/generator.ts:114` | filePath: string, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[] | string |
 | `generateArchitectureSpec` | `src/core/generator.ts:201` | project: ProjectInfo, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[], imports: ImportEdge[] | string |

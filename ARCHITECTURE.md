@@ -4,10 +4,10 @@
 
 ## Overview
 
-- **Source files:** 14
+- **Source files:** 15
 - **Entry points:** vitest.config.ts
-- **Dependencies:** 5
-- **Exported functions:** 19
+- **Dependencies:** 7
+- **Exported functions:** 20
 - **Exported classes:** 1
 - **Exported interfaces:** 9
 
@@ -35,12 +35,21 @@
 | `tests/analyzer.test.ts` | `node:path` | * as path |
 | `tests/analyzer.test.ts` | `../src/core/analyzer.js` | { analyzeAll } |
 | `tests/fixtures/sample-project/src/utils.ts` | `./index.js` | { add } |
+| `src/tui.ts` | `node:fs` | * as fs |
+| `src/tui.ts` | `node:path` | * as path |
+| `src/tui.ts` | `chalk` | chalk |
+| `src/tui.ts` | `@clack/prompts` | { intro, outro, select, spinner, text, cancel, isCancel } |
+| `src/tui.ts` | `./commands/init.js` | { initCommand } |
+| `src/tui.ts` | `./commands/docgen.js` | { docgenCommand } |
+| `src/tui.ts` | `./commands/spec.js` | { specCommand } |
+| `src/tui.ts` | `./commands/review.js` | { reviewCommand } |
 | `src/cli.ts` | `commander` | { Command } |
 | `src/cli.ts` | `chalk` | chalk |
 | `src/cli.ts` | `./commands/init.js` | { initCommand } |
 | `src/cli.ts` | `./commands/docgen.js` | { docgenCommand } |
 | `src/cli.ts` | `./commands/spec.js` | { specCommand } |
 | `src/cli.ts` | `./commands/review.js` | { reviewCommand } |
+| `src/cli.ts` | `./tui.js` | { runTUI } |
 | `src/core/generator.ts` | `node:fs` | * as fs |
 | `src/core/generator.ts` | `node:path` | * as path |
 | `src/core/generator.ts` | `./analyzer.js` | type {
@@ -64,16 +73,7 @@
 | `src/commands/review.ts` | `node:path` | * as path |
 | `src/commands/review.ts` | `chalk` | chalk |
 | `src/commands/review.ts` | `../core/analyzer.js` | { analyzeAll } |
-| `src/commands/init.ts` | `node:fs` | * as fs |
-| `src/commands/init.ts` | `node:path` | * as path |
-| `src/commands/init.ts` | `chalk` | chalk |
-| `src/commands/init.ts` | `../core/analyzer.js` | { analyzeProject } |
-| `src/commands/init.ts` | `../core/generator.js` | { generateCddConfig } |
-| `src/commands/docgen.ts` | `node:fs` | * as fs |
-| `src/commands/docgen.ts` | `node:path` | * as path |
-| `src/commands/docgen.ts` | `chalk` | chalk |
-| `src/commands/docgen.ts` | `chokidar` | { watch } |
-| _… and 3 more imports_ | | |
+| _… and 12 more imports_ | | |
 
 ## Module Map
 
@@ -84,6 +84,7 @@
 
 ### `src/
 
+- `src/tui.ts`
 - `src/index.ts`
 - `src/cli.ts`
 - `src/core/generator.ts`
