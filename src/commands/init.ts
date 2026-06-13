@@ -4,10 +4,7 @@ import chalk from 'chalk';
 import { analyzeProject } from '../core/analyzer.js';
 import { generateCddConfig } from '../core/generator.js';
 
-export async function initCommand(
-  dir: string,
-  options: { force?: boolean },
-): Promise<void> {
+export async function initCommand(dir: string, options: { force?: boolean }): Promise<void> {
   const targetDir = path.resolve(dir);
   const configPath = path.join(targetDir, '.cdd', 'config.json');
 

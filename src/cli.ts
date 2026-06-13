@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { initCommand } from './commands/init.js';
 import { docgenCommand } from './commands/docgen.js';
 import { specCommand } from './commands/spec.js';
+import { reviewCommand } from './commands/review.js';
 
 const pkg = { version: '0.1.0', name: 'code-drive' };
 
@@ -13,9 +14,7 @@ export function runCLI(argv: string[] = process.argv): void {
 
   program
     .name(pkg.name)
-    .description(
-      chalk.cyan('Code-Driven Development (CDD) — Code is the single source of truth.'),
-    )
+    .description(chalk.cyan('Code-Driven Development (CDD) — Code is the single source of truth.'))
     .version(pkg.version);
 
   program
@@ -44,6 +43,15 @@ export function runCLI(argv: string[] = process.argv): void {
     .option('-o, --output <path>', 'Output file for spec', './ARCHITECTURE.md')
     .action(async (dir: string, opts: { output?: string }) => {
       await specCommand(dir, opts);
+    });
+
+  program
+    .command('review')
+    .description('Review codebase against CDD principles')
+    .argument('[directory]', 'Project directory', '.')
+    .option('-o, --output <path>', 'Save report to file')
+    .action(async (dir: string, opts: { output?: string }) => {
+      await reviewCommand(dir, opts);
     });
 
   program.parse(argv);

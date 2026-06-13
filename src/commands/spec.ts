@@ -1,12 +1,12 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import chalk from 'chalk';
-import { analyzeProject, buildModuleTree } from '../core/analyzer.js';
+import { analyzeProject, analyzeSourceFiles } from '../core/analyzer.js';
 import { generateArchitectureSpec, writeDocs } from '../core/generator.js';
 
 export async function specCommand(
   dir: string,
-  options: { output?: string },
+  options: { output?: string; full?: boolean },
 ): Promise<void> {
   const targetDir = path.resolve(dir);
   const outputPath = options.output
@@ -18,12 +18,17 @@ export async function specCommand(
     process.exit(1);
   }
 
-  console.log(chalk.cyan('Analyzing module structure...'));
+  console.log(chalk.cyan('Analyzing code architecture...'));
 
   const project = analyzeProject(targetDir);
-  const modules = buildModuleTree(targetDir, 'src');
+  const { functions, classes, interfaces, imports } = analyzeSourceFiles(targetDir);
 
-  const spec = generateArchitectureSpec(modules, project);
+  console.log(chalk.dim(`  ${functions.length} functions`));
+  console.log(chalk.dim(`  ${classes.length} classes`));
+  console.log(chalk.dim(`  ${interfaces.length} interfaces`));
+  console.log(chalk.dim(`  ${imports.length} import relationships`));
+
+  const spec = generateArchitectureSpec(project, functions, classes, interfaces, imports);
 
   writeDocs([{ filePath: outputPath, content: spec }]);
 

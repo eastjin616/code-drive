@@ -1,8 +1,54 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import chalk from 'chalk';
-import { analyzeProject, extractAnnotations } from '../core/analyzer.js';
-import { generateReadmeDocs, writeDocs } from '../core/generator.js';
+import { watch } from 'chokidar';
+import { analyzeProject, analyzeSourceFiles, extractAnnotations } from '../core/analyzer.js';
+import { generateReadmeDocs, generateApiDocs, writeDocs } from '../core/generator.js';
+import type { DocResult } from '../core/generator.js';
+
+// ─── Doc Generation ───────────────────────────────────────────────────
+
+export function generateDocs(targetDir: string, outputDir: string): DocResult[] {
+  const project = analyzeProject(targetDir);
+  const { functions, classes, interfaces } = analyzeSourceFiles(targetDir);
+  const annotations = extractAnnotations(targetDir);
+
+  // README
+  const readme = generateReadmeDocs(project, functions, classes, interfaces, annotations);
+
+  const results: DocResult[] = [{ filePath: path.join(outputDir, 'README.md'), content: readme }];
+
+  // Per-file API docs
+  const filesWithExports = new Set<string>();
+  for (const fn of functions) {
+    if (fn.exportKind !== 'none') filesWithExports.add(fn.file);
+  }
+  for (const cls of classes) {
+    if (cls.exportKind !== 'none') filesWithExports.add(cls.file);
+  }
+  for (const iface of interfaces) {
+    if (iface.exportKind !== 'none') filesWithExports.add(iface.file);
+  }
+
+  const apiDir = path.join(outputDir, 'api');
+  for (const file of filesWithExports) {
+    const fileFunctions = functions.filter((f) => f.file === file);
+    const fileClasses = classes.filter((c) => c.file === file);
+    const fileInterfaces = interfaces.filter((i) => i.file === file);
+
+    const apiDoc = generateApiDocs(file, fileFunctions, fileClasses, fileInterfaces);
+
+    const docFileName = file.replace(/\.(ts|tsx|js|jsx)$/, '.md').replace(/\//g, '--');
+    results.push({
+      filePath: path.join(apiDir, docFileName),
+      content: apiDoc,
+    });
+  }
+
+  return results;
+}
+
+// ─── Command ──────────────────────────────────────────────────────────
 
 export async function docgenCommand(
   dir: string,
@@ -16,30 +62,67 @@ export async function docgenCommand(
     process.exit(1);
   }
 
+  // Initial generation
   console.log(chalk.cyan('Scanning codebase...'));
 
-  const project = analyzeProject(targetDir);
-  const annotations = extractAnnotations(targetDir);
-
-  console.log(chalk.dim(`  Found ${project.sourceFiles.length} source files`));
-  console.log(chalk.dim(`  Found ${annotations.length} code annotations`));
-
-  const readme = generateReadmeDocs(project, annotations);
-
-  const results = [
-    {
-      filePath: path.join(outputDir, 'README.md'),
-      content: readme,
-    },
-  ];
-
+  const results = generateDocs(targetDir, outputDir);
   writeDocs(results);
 
-  console.log(chalk.green('✓ Documentation generated'));
+  const project = analyzeProject(targetDir);
+  const { functions, classes, interfaces } = analyzeSourceFiles(targetDir);
+  const annotations = extractAnnotations(targetDir);
+
+  console.log(
+    chalk.dim(
+      `  ${project.sourceFiles.length} source files, ` +
+        `${functions.length} functions, ${classes.length} classes, ` +
+        `${interfaces.length} interfaces, ${annotations.length} annotations`,
+    ),
+  );
+  console.log(chalk.green(`✓ ${results.length} documentation files generated`));
   console.log(chalk.dim(`  Output: ${outputDir}/`));
 
+  // Watch mode
   if (options.watch) {
-    console.log(chalk.yellow('Watch mode is not yet implemented.'));
-    console.log(chalk.yellow('Run without --watch for one-time generation.'));
+    const sourcePatterns = [
+      path.join(targetDir, 'src/**/*.{ts,tsx,js,jsx}'),
+      path.join(targetDir, '!src/node_modules/**'),
+    ];
+
+    const watcher = watch(sourcePatterns, {
+      ignoreInitial: true,
+      ignored: /node_modules|dist|\.git/,
+    });
+
+    const generate = () => {
+      const start = Date.now();
+      console.log(chalk.dim('\nChange detected, regenerating...'));
+      const newResults = generateDocs(targetDir, outputDir);
+      writeDocs(newResults);
+      const elapsed = Date.now() - start;
+      console.log(chalk.green(`✓ Regenerated ${newResults.length} files (${elapsed}ms)`));
+    };
+
+    watcher.on('change', generate);
+    watcher.on('add', generate);
+    watcher.on('unlink', generate);
+
+    console.log(chalk.cyan('\nWatching for file changes...'));
+    console.log(chalk.dim('  Press Ctrl+C to stop.\n'));
+
+    // Keep alive — silence the floating promise lint
+    await new Promise<void>((resolve) => {
+      process.on('SIGINT', () => {
+        watcher.close().then(() => {
+          console.log(chalk.cyan('\nWatch mode stopped.'));
+          resolve();
+        });
+      });
+      process.on('SIGTERM', () => {
+        watcher.close().then(() => {
+          resolve();
+        });
+      });
+    });
   }
 }
