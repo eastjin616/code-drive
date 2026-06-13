@@ -6,16 +6,26 @@ import { initCommand } from './commands/init.js';
 import { docgenCommand } from './commands/docgen.js';
 import { specCommand } from './commands/spec.js';
 import { reviewCommand } from './commands/review.js';
+import { runTUI } from './tui.js';
 
 const pkg = { version: '0.1.0', name: 'code-drive' };
 
 export function runCLI(argv: string[] = process.argv): void {
+  if (argv.includes('--tui') || argv.includes('-t')) {
+    runTUI().catch((err) => {
+      console.error(chalk.red('TUI error:'), err);
+      process.exit(1);
+    });
+    return;
+  }
+
   const program = new Command();
 
   program
     .name(pkg.name)
     .description(chalk.cyan('Code-Driven Development (CDD) — Code is the single source of truth.'))
-    .version(pkg.version);
+    .version(pkg.version)
+    .option('-t, --tui', 'Launch interactive TUI mode');
 
   program
     .command('init')
