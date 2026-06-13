@@ -214,10 +214,10 @@ export async function runTUI(): Promise<void> {
         ],
       },
       selectableGroups: false,
-      required: false,
+      required: true,
     });
 
-    if (isCancel(raw) || !raw || raw.length === 0) {
+    if (isCancel(raw)) {
       cancel('CDD를 종료합니다.');
       process.exit(0);
     }
