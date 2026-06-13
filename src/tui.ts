@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { execSync } from 'node:child_process';
 import chalk from 'chalk';
-import { select, spinner, text, cancel, isCancel, groupMultiselect, log } from '@clack/prompts';
+import { select, spinner, cancel, isCancel, groupMultiselect, log } from '@clack/prompts';
 import { initCommand } from './commands/init.js';
 import { docgenCommand } from './commands/docgen.js';
 import { specCommand } from './commands/spec.js';
@@ -58,11 +58,6 @@ type Cmd = keyof typeof labels;
 const EXEC_ORDER: Cmd[] = ['init', 'docgen', 'spec', 'design', 'changelog', 'review', 'context', 'uninstall'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────
-
-function resolveDir(input: string | symbol): string {
-  if (typeof input !== 'string') return '.';
-  return input.trim() || '.';
-}
 
 async function runOne(cmd: Cmd, targetDir: string): Promise<void> {
   const s = spinner();
@@ -226,13 +221,7 @@ export async function runTUI(): Promise<void> {
     if (selected.includes('__all__')) {
       selected = ['docgen', 'spec', 'design', 'changelog', 'review', 'context'];
     }
-    const dir = await text({ message: '대상 디렉토리', placeholder: '.', defaultValue: '.' });
-    if (isCancel(dir)) continue;
-    const targetDir = path.resolve(resolveDir(dir));
-    if (!fs.existsSync(targetDir)) {
-      log.error(`디렉토리 없음: ${targetDir}`);
-      continue;
-    }
+    const targetDir = process.cwd();
     console.log('');
     const ordered = EXEC_ORDER.filter((c) => selected.includes(c));
     for (const cmd of ordered) {
