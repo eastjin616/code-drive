@@ -1,3 +1,8 @@
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/🇺🇸-English-blue?style=for-the-badge" alt="English"></a>
+  <a href="README.ko.md"><img src="https://img.shields.io/badge/🇰🇷-한국어-blue?style=for-the-badge" alt="한국어"></a>
+</p>
+
 # Code-Driven Development (CDD)
 
 > **Code is the single source of truth.** Specs, docs, and architecture are derived from code, not the other way around.
