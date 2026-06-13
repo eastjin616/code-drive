@@ -89,6 +89,7 @@ interface ReleaseSection {
 
 - `git diff-tree --no-commit-id -r --name-only <hash>` 실행
 - 결과를 라인 단위로 배열 반환
+- 첫 번째 커밋(root commit)은 `--diff-filter=A`로 처리 (전체 파일이 added)
 
 **`getCurrentTag(): string | null`**
 
@@ -99,6 +100,8 @@ interface ReleaseSection {
 
 - 정규식 기반 conventional commit 타입 추출
 - 매칭 실패 → `'other'`
+
+> **Note**: v0.1에서는 함수 레벨 AST diff는 제외. 커밋 메시지 + 변경 파일 목록 기반으로 동작.
 
 ### changelog-generator.ts
 

@@ -9,26 +9,11 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-  <a href="https://www.npmjs.com/package/code-drive"><img src="https://img.shields.io/npm/v/code-drive" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@eastjin616/code-drive"><img src="https://img.shields.io/npm/v/@eastjin616/code-drive" alt="npm version"></a>
   <a href="https://github.com/eastjin616/code-drive/actions"><img src="https://img.shields.io/github/actions/workflow/status/eastjin616/code-drive/ci.yml?branch=main" alt="CI"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/code-drive" alt="Node version"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
-
----
-
-## Codex for Open Source — Application Summary
-
-| Field | Value |
-|-------|-------|
-| **Project** | [code-drive](https://github.com/eastjin616/code-drive) — `npm install -g code-drive` |
-| **Maintainer** | [@eastjin616](https://github.com/eastjin616) — sole creator and core maintainer |
-| **License** | MIT |
-| **Language** | TypeScript (Node.js 18+) |
-| **GitHub Stars** | — (new project, growing) |
-| **npm Downloads** | — (published on npm) |
-| **Role** | Core maintainer — architecture, implementation, CI/CD, community |
-| **Ecosystem** | Developer tooling / AI-assisted development methodology |
 
 ---
 
@@ -67,20 +52,59 @@ CDD is a **developer tool** and **methodology** that:
 | 📖 **Doc Gen** | `cdd docgen` | Extract API docs, READMEs, and annotations from code via TypeScript AST |
 | 🏗️ **Arch Spec** | `cdd spec` | Generate architecture spec with full dependency graph |
 | 🔍 **Review** | `cdd review` | Audit codebase against CDD principles |
+| 📋 **Context** | `cdd context` | Print project structure, functions, and dependencies for AI prompts |
+| 🎨 **Design** | `cdd design` | Extract design tokens — colors, typography, spacing — from CSS/TS/Tailwind |
+| 📝 **Changelog** | `cdd changelog` | Auto-generate CHANGELOG.md from git history + code analysis |
 | 👁️ **Watch** | `cdd docgen --watch` | Auto-regenerate docs on file changes |
+| 📦 **Sync** | `cdd sync` | Run all generators at once: docgen + spec + design + changelog |
+| 🗑️ **Uninstall** | `cdd uninstall` | Remove all CDD-generated artifacts from project |
 
 ---
 
-## How We Plan to Use API Credits
+## TUI — Interactive Mode (Default)
 
-The Codex Open Source Fund API credits would be used to:
+Running `cdd` without any subcommand launches an interactive TUI with a two-step menu:
 
-1. **Automated PR review pipeline** — Run `cdd review` on every PR via GitHub Actions, using Codex to analyze code structure changes and enforce CDD conventions automatically
-2. **Release workflow automation** — Generate changelogs and migration guides from code diffs before each release
-3. **Issue triage** — Use Codex to classify incoming issues, suggest labels, and route to appropriate maintainers based on code area mapping
-4. **Documentation regeneration** — Automatically regenerate project docs when dependencies or major APIs change
+```
+$ cdd
 
-This reduces maintainer overhead by 60-70% on routine tasks, freeing time for architecture and community work.
+    ██████╗██████╗ ██████╗ 
+   ██╔════╝██╔══██╗██╔══██╗
+   ██║     ██║  ██║██║  ██║
+   ██║     ██║  ██║██║  ██║
+   ╚██████╗██████╔╝██████╔╝
+    ╚═════╝╚═════╝ ╚═════╝ 
+   Code-Driven Development
+
+? 실행할 명령어를 선택하세요 (Use arrow keys)
+❯ 명령어 실행  — 생성/분석 명령어를 선택합니다
+  init         — CDD 설정 초기화
+  uninstall    — CDD 아티팩트 제거
+```
+
+**Step 1** — `명령어 실행`을 선택하면 그룹별 다중 선택 메뉴로 이동합니다:
+
+```
+? 실행할 명령어를 선택하세요 (Space로 선택, Enter로 실행)
+  ⚡ 모두 선택
+ │ 📄 생성
+  ├ ▪ docgen     — 코드 → 문서
+  ├ ▪ design     — 디자인 토큰 추출
+  └ ▪ changelog  — CHANGELOG 자동 생성
+ │ 🔍 분석
+  ├ ▪ spec       — 아키텍처 스펙
+  ├ ▪ review     — CDD 감사
+  └ ▪ context    — AI 컨텍스트 출력
+```
+
+- **그룹 헤더**(📄 생성 / 🔍 분석)는 선택 불가 — 순수 시각적 구분
+- **⚡ 모두 선택** — 체크하면 6개 모든 명령어를 한 번에 실행
+- 다중 선택 후 Enter → 선택된 명령어를 순차 실행
+- 생성 명령어(docgen/spec/design/changelog) 완료 후 파일 열기 확인 (`open`/`xdg-open`)
+
+**init / uninstall**은 바로 실행 단계로 넘어갑니다 (디렉토리 입력 → 실행).
+
+Pass `--cli` to skip the TUI and use traditional command-line mode directly. Use `--help` or `-h` for CLI help.
 
 ---
 
@@ -88,10 +112,10 @@ This reduces maintainer overhead by 60-70% on routine tasks, freeing time for ar
 
 ```bash
 # Install globally (recommended)
-npm install -g code-drive
+npm install -g @eastjin616/code-drive
 
 # Or run directly without installation
-npx code-drive <command>
+npx @eastjin616/code-drive <command>
 ```
 
 **Requirements:** Node.js 18+
@@ -101,17 +125,21 @@ npx code-drive <command>
 ## Quick Start
 
 ```bash
+# Just run `cdd` — the TUI menu guides you through all commands
+cdd
+
+# Or use CLI mode for scripting/automation:
 # Step 1: Initialize CDD in your project
 cdd init
 
-# Step 2: Generate documentation from your codebase
-cdd docgen
+# Step 2: Generate all documentation, specs, and design in one go
+cdd sync
 
-# Step 3: Extract the architecture specification
-cdd spec
-
-# Step 4: Audit your codebase against CDD principles
+# Step 3: Audit your codebase against CDD principles
 cdd review
+
+# Step 4: Generate CHANGELOG from git history
+cdd changelog
 ```
 
 ### Example Output
@@ -245,6 +273,51 @@ Audits a codebase against CDD principles. Checks:
 |--------|-------------|
 | `-o, --output <path>` | Save report to file |
 
+### `cdd context [directory]`
+
+Prints project context optimized for AI prompts — module structure, exported symbols, import relationships, and dependency graph. Useful for feeding into AI coding assistants (Claude Code, Codex, Copilot).
+
+| Option | Description |
+|--------|-------------|
+| `-f, --file <path>` | Show context for a specific file only |
+
+### `cdd design [directory]`
+
+Scans source code for design tokens across multiple sources and generates a consolidated `DESIGN.md`:
+
+- **CSS**: `--color-*`, `--font-*`, `--space-*`, `--radius-*`, `--shadow-*` custom properties
+- **TypeScript**: Named `const` color/spacing objects (e.g. `const colors = {}`)
+- **Tailwind**: `tailwind.config.*` theme extensions
+
+Output includes color swatches (rendered as ASCII blocks), token categories, and source file references.
+
+| Option | Description |
+|--------|-------------|
+| `-o, --output <path>` | Output file for design spec (default: `./DESIGN.md`) |
+
+### `cdd uninstall [directory]`
+
+Removes all CDD-generated artifacts from the project — `.cdd/`, `docs/`, `ARCHITECTURE.md`, and related output files.
+
+### `cdd sync [directory]`
+
+Runs all generators in sequence: `docgen` → `spec` → `design` → `changelog`. Each step runs with default options. Useful for quickly regenerating all project artifacts after code changes.
+
+| Option | Description |
+|--------|-------------|
+| `-o, --output <path>` | Output directory for generated artifacts (applied to all steps) |
+
+### `cdd changelog [directory]`
+
+Parses git history using conventional commits and generates/updates CHANGELOG.md. Groups changes by type (Added, Fixed, Changed, Docs, etc.) and includes changed file paths. Uses existing tags to determine version ranges automatically.
+
+| Option | Description |
+|--------|-------------|
+| `-f, --from <ref>` | Starting commit ref (default: last tag or first commit) |
+| `-t, --to <ref>` | Ending commit ref (default: HEAD) |
+| `-o, --output <path>` | Output file (default: `./CHANGELOG.md`) |
+| `--dry-run` | Preview without writing to file |
+
 ---
 
 ## Project Structure
@@ -282,7 +355,7 @@ npm run format    # Prettier
 | Script | Description |
 |--------|-------------|
 | `npm run build` | Compile TypeScript → `dist/` |
-| `npm test` | Run vitest test suite (19 tests) |
+| `npm test` | Run vitest test suite (36 tests) |
 | `npm run dev` | Run directly with tsx |
 | `npm run lint` | ESLint check |
 | `npm run format` | Prettier auto-format |
@@ -292,8 +365,6 @@ npm run format    # Prettier
 ## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-This project is [open source](LICENSE) and applying for the **OpenAI Codex for Open Source Program** — clean code, strong practices, and community-first design.
 
 ## License
 
