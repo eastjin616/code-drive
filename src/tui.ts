@@ -7,6 +7,7 @@ import { docgenCommand } from './commands/docgen.js';
 import { specCommand } from './commands/spec.js';
 import { reviewCommand } from './commands/review.js';
 import { uninstallCommand } from './commands/uninstall.js';
+import { contextCommand } from './commands/context.js';
 
 // ─── Banner ───────────────────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ export async function runTUI(): Promise<void> {
         { value: 'docgen', label: 'docgen', hint: '코드에서 문서 자동 생성' },
         { value: 'spec', label: 'spec', hint: '아키텍처 스펙 추출' },
         { value: 'review', label: 'review', hint: 'CDD 원칙 코드 감사' },
+        { value: 'context', label: 'context', hint: 'AI 프롬프트용 프로젝트 컨텍스트 출력' },
         { value: 'uninstall', label: 'uninstall', hint: 'CDD 아티팩트 제거' },
         { value: 'exit', label: 'exit', hint: '종료' },
       ],
@@ -126,6 +128,19 @@ export async function runTUI(): Promise<void> {
           s.stop('리뷰 완료');
         } catch (e) {
           s.stop('리뷰 실패');
+          console.log(chalk.red(`  ✖ ${e}`));
+        }
+        break;
+      }
+
+      case 'context': {
+        const s = spinner();
+        s.start('컨텍스트 수집 중...');
+        try {
+          await contextCommand(targetDir, {});
+          s.stop('컨텍스트 출력 완료');
+        } catch (e) {
+          s.stop('컨텍스트 수집 실패');
           console.log(chalk.red(`  ✖ ${e}`));
         }
         break;
