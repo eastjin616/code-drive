@@ -11,13 +11,14 @@ import { contextCommand } from './commands/context.js';
 import { designCommand } from './commands/design.js';
 import { changelogCommand } from './commands/changelog.js';
 import { syncCommand } from './commands/sync.js';
+import { updateCommand } from './commands/update.js';
 import { runTUI } from './tui.js';
 
 const pkg = { version: '0.2.0', name: 'code-drive' };
 
 export function runCLI(argv: string[] = process.argv): void {
   const cliFlags = ['--cli', '--help', '-h', '-V', '--version'];
-  const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'context', 'design', 'changelog', 'sync', 'help'];
+  const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'context', 'design', 'changelog', 'sync', 'update', 'help'];
   const isCliMode = cliFlags.some((f) => argv.includes(f));
   const hasSubcommand = argv.slice(2).some((a) => subcommands.includes(a));
 
@@ -119,6 +120,14 @@ export function runCLI(argv: string[] = process.argv): void {
     .option('-o, --output <path>', 'Output directory for generated artifacts')
     .action(async (dir: string, opts: { output?: string }) => {
       await syncCommand(dir, opts);
+    });
+
+  program
+    .command('update')
+    .description('Update cdd CLI to the latest version from npm')
+    .option('--check', 'Check for update without installing')
+    .action(async (opts: { check?: boolean }) => {
+      await updateCommand('.', opts);
     });
 
   program.parse(argv);

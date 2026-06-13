@@ -11,6 +11,7 @@ import { uninstallCommand } from './commands/uninstall.js';
 import { contextCommand } from './commands/context.js';
 import { designCommand } from './commands/design.js';
 import { changelogCommand } from './commands/changelog.js';
+import { updateCommand } from './commands/update.js';
 
 // ─── Banner ───────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ const labels: Record<string, string> = {
   review: 'review',
   context: 'context',
   uninstall: 'uninstall',
+  update: 'update',
 };
 
 const labelKor: Record<string, string> = {
@@ -48,6 +50,7 @@ const labelKor: Record<string, string> = {
   review: 'CDD 원칙 코드 감사',
   context: 'AI 프롬프트용 컨텍스트 출력',
   uninstall: 'CDD 아티팩트 제거',
+  update: 'cdd 자체 업데이트',
 };
 
 type Cmd = keyof typeof labels;
@@ -161,6 +164,7 @@ export async function runTUI(): Promise<void> {
       options: [
         { value: 'cmds', label: '명령어 실행', hint: 'docgen, spec, design, changelog, review, context' },
         { value: 'init', label: 'init', hint: 'CDD 설정 초기화' },
+        { value: 'update', label: 'update', hint: 'cdd 자체 업데이트' },
         { value: 'uninstall', label: 'uninstall', hint: 'CDD 아티팩트 제거' },
       ],
     });
@@ -170,16 +174,22 @@ export async function runTUI(): Promise<void> {
       process.exit(0);
     }
 
-    if (mode === 'init' || mode === 'uninstall') {
-      const dir = await text({ message: '대상 디렉토리', placeholder: '.', defaultValue: '.' });
-      if (isCancel(dir)) continue;
-      const targetDir = path.resolve(resolveDir(dir));
-      if (!fs.existsSync(targetDir)) {
-        log.error(`디렉토리 없음: ${targetDir}`);
-        continue;
+    if (mode === 'init' || mode === 'uninstall' || mode === 'update') {
+      if (mode === 'update') {
+        console.log('');
+        await updateCommand('.', {});
+        console.log('');
+      } else {
+        const dir = await text({ message: '대상 디렉토리', placeholder: '.', defaultValue: '.' });
+        if (isCancel(dir)) continue;
+        const targetDir = path.resolve(resolveDir(dir));
+        if (!fs.existsSync(targetDir)) {
+          log.error(`디렉토리 없음: ${targetDir}`);
+          continue;
+        }
+        console.log('');
+        await runOne(mode, targetDir);
       }
-      console.log('');
-      await runOne(mode, targetDir);
       console.log('');
       const again = await select({
         message: '계속하시겠습니까?',
