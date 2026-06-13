@@ -11,7 +11,12 @@ import { runTUI } from './tui.js';
 const pkg = { version: '0.1.0', name: 'code-drive' };
 
 export function runCLI(argv: string[] = process.argv): void {
-  if (argv.includes('--tui') || argv.includes('-t')) {
+  const cliFlags = ['--cli', '--help', '-h', '-V', '--version'];
+  const subcommands = ['init', 'docgen', 'spec', 'review', 'help'];
+  const isCliMode = cliFlags.some((f) => argv.includes(f));
+  const hasSubcommand = argv.slice(2).some((a) => subcommands.includes(a));
+
+  if (!isCliMode && !hasSubcommand) {
     runTUI().catch((err) => {
       console.error(chalk.red('TUI error:'), err);
       process.exit(1);
@@ -25,7 +30,7 @@ export function runCLI(argv: string[] = process.argv): void {
     .name(pkg.name)
     .description(chalk.cyan('Code-Driven Development (CDD) — Code is the single source of truth.'))
     .version(pkg.version)
-    .option('-t, --tui', 'Launch interactive TUI mode');
+    .option('--cli', 'Force legacy CLI mode (skip TUI)');
 
   program
     .command('init')
