@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0] — 2026-06-13
+
+### Added
+
+- `cdd design` — 디자인 토큰 추출 (CSS 변수, TS 상수, Tailwind config → DESIGN.md)
+  → [상세](docs/changelog/2026-06-13_cdd-design-command.md)
+
+### Changed
+
+- (no changes)
+
 ## [0.1.0] — 2026-06-13
 
 ### Added

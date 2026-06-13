@@ -1,6 +1,6 @@
 {
   "name": "code-drive",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Code-Driven Development (CDD) CLI — Code is the single source of truth. Specs, docs, and architecture are derived from code, not the other way around.",
   "type": "module",
   "bin": {
