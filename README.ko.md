@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-  <a href="https://www.npmjs.com/package/code-drive"><img src="https://img.shields.io/npm/v/code-drive" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@eastjin616/code-drive"><img src="https://img.shields.io/npm/v/@eastjin616/code-drive" alt="npm version"></a>
   <a href="https://github.com/eastjin616/code-drive/actions"><img src="https://img.shields.io/github/actions/workflow/status/eastjin616/code-drive/ci.yml?branch=main" alt="CI"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/code-drive" alt="Node version"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
@@ -52,8 +52,57 @@ CDD는 **개발자 도구**이자 **방법론**입니다:
 | 📖 **문서 생성** | `cdd docgen` | TypeScript AST로 코드에서 API 문서/README/어노테이션 추출 |
 | 🏗️ **아키텍처 스펙** | `cdd spec` | 전체 의존성 그래프를 포함한 아키텍처 스펙 생성 |
 | 🔍 **리뷰** | `cdd review` | CDD 원칙에 따른 코드베이스 감사 |
+| 📋 **컨텍스트** | `cdd context` | AI 프롬프트용 프로젝트 구조/함수/의존성 출력 |
+| 🎨 **디자인** | `cdd design` | CSS/TS/Tailwind에서 디자인 토큰 추출 (색상/폰트/간격) |
+| 📝 **체인지로그** | `cdd changelog` | Git 히스토리 + 코드 분석으로 CHANGELOG.md 자동 생성 |
 | 👁️ **Watch 모드** | `cdd docgen --watch` | 파일 변경 시 문서 자동 재생성 |
-| 🖥️ **TUI 모드** | `cdd --tui` | 인터랙티브 TUI 메뉴로 모든 명령어 실행 |
+| 📦 **Sync** | `cdd sync` | docgen + spec + design + changelog 한 번에 실행 |
+| 🗑️ **제거** | `cdd uninstall` | 프로젝트에서 모든 CDD 아티팩트 제거 |
+
+---
+
+## TUI — 인터랙티브 모드 (기본)
+
+`cdd`를 인수 없이 실행하면 2단계 메뉴로 구성된 TUI가 실행됩니다:
+
+```
+$ cdd
+
+    ██████╗██████╗ ██████╗ 
+   ██╔════╝██╔══██╗██╔══██╗
+   ██║     ██║  ██║██║  ██║
+   ██║     ██║  ██║██║  ██║
+   ╚██████╗██████╔╝██████╔╝
+    ╚═════╝╚═════╝ ╚═════╝ 
+   Code-Driven Development
+
+? 실행할 명령어를 선택하세요 (Use arrow keys)
+❯ 명령어 실행  — 생성/분석 명령어를 선택합니다
+  init         — CDD 설정 초기화
+  uninstall    — CDD 아티팩트 제거
+```
+
+**1단계** — `명령어 실행` 선택 시 그룹별 다중 선택 메뉴로 이동:
+
+```
+? 실행할 명령어를 선택하세요 (Space로 선택, Enter로 실행)
+  ⚡ 모두 선택
+ │ 📄 생성
+  ├ ▪ docgen     — 코드 → 문서
+  ├ ▪ design     — 디자인 토큰 추출
+  └ ▪ changelog  — CHANGELOG 자동 생성
+ │ 🔍 분석
+  ├ ▪ spec       — 아키텍처 스펙
+  ├ ▪ review     — CDD 감사
+  └ ▪ context    — AI 컨텍스트 출력
+```
+
+- **그룹 헤더**(📄 생성 / 🔍 분석) — 선택 불가, 순수 시각적 구분
+- **⚡ 모두 선택** — 체크 시 6개 모든 명령어를 한 번에 실행
+- 생성 명령어(docgen/spec/design/changelog) 완료 후 파일 열기 확인
+- **init / uninstall**은 바로 실행 단계로 넘어감 (디렉토리 입력 → 실행)
+
+`--cli` 플래그를 전달하면 TUI 없이 CLI 모드로 직접 실행합니다.
 
 ---
 
@@ -61,10 +110,10 @@ CDD는 **개발자 도구**이자 **방법론**입니다:
 
 ```bash
 # 글로벌 설치 (권장)
-npm install -g code-drive
+npm install -g @eastjin616/code-drive
 
 # 설치 없이 직접 실행
-npx code-drive <command>
+npx @eastjin616/code-drive <command>
 ```
 
 **요구사항:** Node.js 18+
@@ -77,14 +126,14 @@ npx code-drive <command>
 # 1단계: 프로젝트에 CDD 초기화
 cdd init
 
-# 2단계: 코드베이스에서 문서 생성
-cdd docgen
+# 2단계: 문서 + 스펙 + 디자인 + 체인지로그 한 방에 생성
+cdd sync
 
-# 3단계: 아키텍처 스펙 추출
-cdd spec
-
-# 4단계: CDD 원칙에 따라 코드 감사
+# 3단계: CDD 원칙에 따라 코드 감사
 cdd review
+
+# 4단계: Git 히스토리에서 CHANGELOG 생성
+cdd changelog
 ```
 
 ### 실행 예시
@@ -218,9 +267,47 @@ CDD 원칙에 따라 코드베이스를 감사합니다. 검사 항목:
 |--------|-------------|
 | `-o, --output <path>` | 결과를 파일로 저장 |
 
-### `cdd --tui`
+### `cdd context [directory]`
 
-인터랙티브 TUI 모드로 실행합니다. init/docgen/spec/review를 메뉴에서 선택하여 실행할 수 있습니다.
+AI 프롬프트에 최적화된 프로젝트 컨텍스트 출력 — 모듈 구조, export 심볼, import 관계, 의존성 그래프.
+
+| 옵션 | 설명 |
+|--------|-------------|
+| `-f, --file <path>` | 특정 파일만 컨텍스트 출력 |
+
+### `cdd design [directory]`
+
+CSS/TS/Tailwind에서 디자인 토큰을 추출하여 `DESIGN.md` 생성:
+- **CSS**: `--color-*`, `--font-*`, `--space-*` 커스텀 프로퍼티
+- **TypeScript**: 명명된 `const` 색상/간격 객체
+- **Tailwind**: `tailwind.config.*` theme 확장
+
+| 옵션 | 설명 |
+|--------|-------------|
+| `-o, --output <path>` | 출력 파일 (기본값: `./DESIGN.md`) |
+
+### `cdd uninstall [directory]`
+
+프로젝트에서 모든 CDD 생성 아티팩트 제거 — `.cdd/`, `docs/`, `ARCHITECTURE.md` 등
+
+### `cdd sync [directory]`
+
+모든 생성기를 순차 실행: `docgen` → `spec` → `design` → `changelog`
+
+| 옵션 | 설명 |
+|--------|-------------|
+| `-o, --output <path>` | 생성된 아티팩트 출력 디렉토리 |
+
+### `cdd changelog [directory]`
+
+Conventional Commit 기반 Git 히스토리 파싱 → CHANGELOG.md 생성/갱신. 태그로 버전 범위 자동 결정.
+
+| 옵션 | 설명 |
+|--------|-------------|
+| `-f, --from <ref>` | 시작 커밋 (기본값: 마지막 태그 또는 첫 커밋) |
+| `-t, --to <ref>` | 종료 커밋 (기본값: HEAD) |
+| `-o, --output <path>` | 출력 파일 (기본값: `./CHANGELOG.md`) |
+| `--dry-run` | 파일 쓰기 없이 미리보기 |
 
 ---
 
@@ -259,7 +346,7 @@ npm run format    # Prettier
 | 명령어 | 설명 |
 |--------|-------------|
 | `npm run build` | TypeScript 컴파일 → `dist/` |
-| `npm test` | vitest 테스트 실행 (19 tests) |
+| `npm test` | vitest 테스트 실행 (36 tests) |
 | `npm run dev` | tsx로 직접 실행 |
 | `npm run lint` | ESLint 검사 |
 | `npm run format` | Prettier 자동 포맷 |
