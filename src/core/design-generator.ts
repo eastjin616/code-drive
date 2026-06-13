@@ -20,8 +20,8 @@ export function writeDocs(results: DocResult[]): void {
 // ─── Color Swatch ──────────────────────────────────────────────────────
 
 function colorSwatch(value: string): string {
-  // Return a simple square with the color for visual reference in markdown
-  return `![color](https://placehold.co/16x16/${value.replace('#', '')}/${value.replace('#', '')})`;
+  const hex = value.replace('#', '');
+  return `<span style="display:inline-block;width:16px;height:16px;background:#${hex};border:1px solid #ccc;border-radius:3px;"></span>`;
 }
 
 function isHexColor(v: string): boolean {
