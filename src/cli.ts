@@ -13,7 +13,7 @@ import { changelogCommand } from './commands/changelog.js';
 import { syncCommand } from './commands/sync.js';
 import { runTUI } from './tui.js';
 
-const pkg = { version: '0.1.0', name: 'code-drive' };
+const pkg = { version: '0.2.0', name: 'code-drive' };
 
 export function runCLI(argv: string[] = process.argv): void {
   const cliFlags = ['--cli', '--help', '-h', '-V', '--version'];
