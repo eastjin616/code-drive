@@ -8,13 +8,14 @@ import { specCommand } from './commands/spec.js';
 import { reviewCommand } from './commands/review.js';
 import { uninstallCommand } from './commands/uninstall.js';
 import { contextCommand } from './commands/context.js';
+import { designCommand } from './commands/design.js';
 import { runTUI } from './tui.js';
 
 const pkg = { version: '0.1.0', name: 'code-drive' };
 
 export function runCLI(argv: string[] = process.argv): void {
   const cliFlags = ['--cli', '--help', '-h', '-V', '--version'];
-  const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'context', 'help'];
+  const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'context', 'design', 'help'];
   const isCliMode = cliFlags.some((f) => argv.includes(f));
   const hasSubcommand = argv.slice(2).some((a) => subcommands.includes(a));
 
@@ -86,6 +87,15 @@ export function runCLI(argv: string[] = process.argv): void {
     .option('-f, --file <path>', 'Show context for a specific file')
     .action(async (dir: string, opts: { file?: string }) => {
       await contextCommand(dir, opts);
+    });
+
+  program
+    .command('design')
+    .description('Extract design tokens from code — colors, typography, spacing, and more')
+    .argument('[directory]', 'Project directory', '.')
+    .option('-o, --output <path>', 'Output file for design spec', './DESIGN.md')
+    .action(async (dir: string, opts: { output?: string }) => {
+      await designCommand(dir, opts);
     });
 
   program.parse(argv);

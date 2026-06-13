@@ -8,6 +8,7 @@ import { specCommand } from './commands/spec.js';
 import { reviewCommand } from './commands/review.js';
 import { uninstallCommand } from './commands/uninstall.js';
 import { contextCommand } from './commands/context.js';
+import { designCommand } from './commands/design.js';
 
 // ─── Banner ───────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ export async function runTUI(): Promise<void> {
         { value: 'review', label: 'review', hint: 'CDD 원칙 코드 감사' },
         { value: 'context', label: 'context', hint: 'AI 프롬프트용 프로젝트 컨텍스트 출력' },
         { value: 'uninstall', label: 'uninstall', hint: 'CDD 아티팩트 제거' },
+        { value: 'design', label: 'design', hint: '디자인 토큰 추출 (색상/폰트/간격)' },
         { value: 'exit', label: 'exit', hint: '종료' },
       ],
     });
@@ -154,6 +156,19 @@ export async function runTUI(): Promise<void> {
           s.stop('제거 완료');
         } catch (e) {
           s.stop('제거 실패');
+          console.log(chalk.red(`  ✖ ${e}`));
+        }
+        break;
+      }
+
+      case 'design': {
+        const s = spinner();
+        s.start('디자인 토큰 추출 중...');
+        try {
+          await designCommand(targetDir, {});
+          s.stop('디자인 스펙 생성 완료');
+        } catch (e) {
+          s.stop('디자인 추출 실패');
           console.log(chalk.red(`  ✖ ${e}`));
         }
         break;
