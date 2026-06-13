@@ -1,3 +1,25 @@
+## [31fdb7b] — 2026-06-13
+
+### Added
+
+- cdd sync 명령어 추가 — docgen + spec + design + changelog 순차 실행
+  → src/commands/sync.ts, src/cli.ts
+- cdd changelog 명령어 추가 — git 히스토리 기반 CHANGELOG.md 생성
+  → src/commands/changelog.ts, src/core/changelog-parser.ts, src/core/changelog-generator.ts, tests/changelog.test.ts, src/cli.ts
+- DESIGN.md mergeWithExisting — 기존 내용 보존 + 신규 내용 상단 추가
+  → src/core/design-generator.ts, src/commands/design.ts
+
+### Changed
+
+- TUI 전면 개편: select(3모드) → groupMultiselect(📄생성/🔍분석/⚡모두선택), init/uninstall 분리
+  → src/tui.ts
+- README 한국어판 업데이트 — TUI 구조, 신규 명령어 반영
+  → README.ko.md
+- npm publish 완료 — scoped package @eastjin616/code-drive@0.2.0
+  → package.json
+- README: TUI 구조, sync 명령어, scoped package 반영
+  → README.md
+
 ## [2cee783e8c6ca8aee7933c2c2e8703e127ce37f2] — 2026-06-13
 
 ### Added
