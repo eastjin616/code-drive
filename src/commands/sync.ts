@@ -8,7 +8,7 @@ import { changelogCommand } from './changelog.js';
 
 export async function syncCommand(
   dir: string,
-  _options: { output?: string } = {},
+  options: { output?: string } = {},
 ): Promise<void> {
   const targetDir = path.resolve(dir);
 
@@ -16,11 +16,13 @@ export async function syncCommand(
     throw new Error(`Directory not found: ${targetDir}`);
   }
 
+  const outputOpt = options.output ? { output: options.output } : {};
+
   const steps = [
-    { name: 'docgen', label: '문서 생성', fn: () => docgenCommand(targetDir, {}) },
-    { name: 'spec', label: '아키텍처 스펙', fn: () => specCommand(targetDir, {}) },
-    { name: 'design', label: '디자인 토큰', fn: () => designCommand(targetDir, {}) },
-    { name: 'changelog', label: '체인지로그', fn: () => changelogCommand(targetDir, {}) },
+    { name: 'docgen', label: '문서 생성', fn: () => docgenCommand(targetDir, outputOpt) },
+    { name: 'spec', label: '아키텍처 스펙', fn: () => specCommand(targetDir, outputOpt) },
+    { name: 'design', label: '디자인 토큰', fn: () => designCommand(targetDir, outputOpt) },
+    { name: 'changelog', label: '체인지로그', fn: () => changelogCommand(targetDir, outputOpt) },
   ];
 
   console.log(chalk.cyan.bold('\n📦 CDD Sync — 실행 중...\n'));
