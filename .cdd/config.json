@@ -1,0 +1,12 @@
+{
+  "version": "0.1.0",
+  "sourceDir": "src",
+  "docDir": "docs",
+  "language": "typescript",
+  "conventions": {
+    "modulePattern": "**/index.ts",
+    "annotationStyle": "tsdoc"
+  },
+  "generatedAt": "2026-06-13T01:45:58.858Z",
+  "projectRoot": "/Users/seodongjin/code-drive"
+}
