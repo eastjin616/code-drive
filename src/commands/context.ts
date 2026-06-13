@@ -205,15 +205,13 @@ export async function contextCommand(dir: string, options: { file?: string }): P
   const targetDir = path.resolve(dir);
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   if (options.file) {
     const filePath = resolveActualPath(targetDir, options.file);
     if (!filePath) {
-      console.error(chalk.red(`File not found: ${options.file}`));
-      process.exit(1);
+      throw new Error(`File not found: ${options.file}`);
     }
     console.log(fileContext(targetDir, filePath));
   } else {

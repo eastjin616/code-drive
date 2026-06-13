@@ -21,14 +21,12 @@ export async function changelogCommand(
   const targetDir = path.resolve(dir);
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   // Check git repo
   if (!isGitRepo(targetDir)) {
-    console.error(chalk.red('Not a git repository'));
-    process.exit(1);
+    throw new Error('Not a git repository');
   }
 
   const outputPath = options.output
@@ -43,8 +41,7 @@ export async function changelogCommand(
     from = getCurrentTag(targetDir) ?? getFirstCommitHash(targetDir) ?? undefined;
   }
   if (!from) {
-    console.error(chalk.red('No commits found in repository'));
-    process.exit(1);
+    throw new Error('No commits found in repository');
   }
 
   // Determine version label for the release section
@@ -56,7 +53,7 @@ export async function changelogCommand(
 
   if (commits.length === 0) {
     console.log(chalk.yellow('No changes found'));
-    process.exit(0);
+    return;
   }
 
   console.log(chalk.dim(`  ${commits.length} commits`));

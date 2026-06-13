@@ -16,6 +16,17 @@ import { runTUI } from './tui.js';
 
 const pkg = { version: '0.2.0', name: 'code-drive' };
 
+function exitOnError(fn: (...args: any[]) => Promise<void>) {
+  return async (...args: any[]) => {
+    try {
+      await fn(...args);
+    } catch (e) {
+      console.error(chalk.red(e instanceof Error ? e.message : String(e)));
+      process.exit(1);
+    }
+  };
+}
+
 export function runCLI(argv: string[] = process.argv): void {
   const cliFlags = ['--cli', '--help', '-h', '-V', '--version'];
   const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'context', 'design', 'changelog', 'sync', 'update', 'help'];
@@ -43,9 +54,9 @@ export function runCLI(argv: string[] = process.argv): void {
     .description('Initialize CDD configuration in a project')
     .argument('[directory]', 'Project directory', '.')
     .option('-f, --force', 'Overwrite existing configuration')
-    .action(async (dir: string, opts: { force?: boolean }) => {
+    .action(exitOnError(async (dir: string, opts: { force?: boolean }) => {
       await initCommand(dir, opts);
-    });
+    }));
 
   program
     .command('docgen')
@@ -53,53 +64,53 @@ export function runCLI(argv: string[] = process.argv): void {
     .argument('[directory]', 'Project directory', '.')
     .option('-o, --output <path>', 'Output directory for generated docs', './docs')
     .option('-w, --watch', 'Watch for changes and regenerate')
-    .action(async (dir: string, opts: { output?: string; watch?: boolean }) => {
+    .action(exitOnError(async (dir: string, opts: { output?: string; watch?: boolean }) => {
       await docgenCommand(dir, opts);
-    });
+    }));
 
   program
     .command('spec')
     .description('Extract and verify architecture specifications from code')
     .argument('[directory]', 'Project directory', '.')
     .option('-o, --output <path>', 'Output file for spec', './ARCHITECTURE.md')
-    .action(async (dir: string, opts: { output?: string }) => {
+    .action(exitOnError(async (dir: string, opts: { output?: string }) => {
       await specCommand(dir, opts);
-    });
+    }));
 
   program
     .command('review')
     .description('Review codebase against CDD principles')
     .argument('[directory]', 'Project directory', '.')
     .option('-o, --output <path>', 'Save report to file')
-    .action(async (dir: string, opts: { output?: string }) => {
+    .action(exitOnError(async (dir: string, opts: { output?: string }) => {
       await reviewCommand(dir, opts);
-    });
+    }));
 
   program
     .command('uninstall')
     .description('Remove all CDD artifacts (.cdd/, ARCHITECTURE.md, docs/) from project')
     .argument('[directory]', 'Project directory', '.')
-    .action(async (dir: string) => {
+    .action(exitOnError(async (dir: string) => {
       await uninstallCommand(dir);
-    });
+    }));
 
   program
     .command('context')
     .description('Print project context for AI prompts — structure, functions, dependencies')
     .argument('[directory]', 'Project directory', '.')
     .option('-f, --file <path>', 'Show context for a specific file')
-    .action(async (dir: string, opts: { file?: string }) => {
+    .action(exitOnError(async (dir: string, opts: { file?: string }) => {
       await contextCommand(dir, opts);
-    });
+    }));
 
   program
     .command('design')
     .description('Extract design tokens from code — colors, typography, spacing, and more')
     .argument('[directory]', 'Project directory', '.')
     .option('-o, --output <path>', 'Output file for design spec', './DESIGN.md')
-    .action(async (dir: string, opts: { output?: string }) => {
+    .action(exitOnError(async (dir: string, opts: { output?: string }) => {
       await designCommand(dir, opts);
-    });
+    }));
 
   program
     .command('changelog')
@@ -109,26 +120,26 @@ export function runCLI(argv: string[] = process.argv): void {
     .option('-t, --to <ref>', 'Ending commit ref (default: HEAD)')
     .option('-o, --output <path>', 'Output file for changelog', './CHANGELOG.md')
     .option('--dry-run', 'Preview changelog without writing to file')
-    .action(async (dir: string, opts: { from?: string; to?: string; output?: string; dryRun?: boolean }) => {
+    .action(exitOnError(async (dir: string, opts: { from?: string; to?: string; output?: string; dryRun?: boolean }) => {
       await changelogCommand(dir, opts);
-    });
+    }));
 
   program
     .command('sync')
     .description('Run all generators: docgen + spec + design + changelog')
     .argument('[directory]', 'Project directory', '.')
     .option('-o, --output <path>', 'Output directory for generated artifacts')
-    .action(async (dir: string, opts: { output?: string }) => {
+    .action(exitOnError(async (dir: string, opts: { output?: string }) => {
       await syncCommand(dir, opts);
-    });
+    }));
 
   program
     .command('update')
     .description('Update cdd CLI to the latest version from npm')
     .option('--check', 'Check for update without installing')
-    .action(async (opts: { check?: boolean }) => {
+    .action(exitOnError(async (opts: { check?: boolean }) => {
       await updateCommand('.', opts);
-    });
+    }));
 
   program.parse(argv);
 }

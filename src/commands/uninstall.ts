@@ -6,8 +6,7 @@ export async function uninstallCommand(dir: string): Promise<void> {
   const targetDir = path.resolve(dir);
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   const targets: { path: string; label: string }[] = [

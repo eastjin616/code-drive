@@ -13,8 +13,7 @@ export async function syncCommand(
   const targetDir = path.resolve(dir);
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   const steps = [
@@ -32,9 +31,7 @@ export async function syncCommand(
       await step.fn();
       console.log('');
     } catch (e) {
-      console.error(chalk.red(`  ✗ ${step.label} 실패`));
-      console.error(chalk.dim(String(e)));
-      process.exit(1);
+      throw new Error(`${step.label} 실패: ${e}`);
     }
   }
 

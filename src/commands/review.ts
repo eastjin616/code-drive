@@ -118,8 +118,7 @@ export async function reviewCommand(dir: string, options: { output?: string }): 
   const targetDir = path.resolve(dir);
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   console.log(chalk.cyan('Running CDD review...'));

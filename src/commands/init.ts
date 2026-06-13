@@ -9,8 +9,7 @@ export async function initCommand(dir: string, options: { force?: boolean }): Pr
   const configPath = path.join(targetDir, '.cdd', 'config.json');
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   if (fs.existsSync(configPath) && !options.force) {

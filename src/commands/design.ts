@@ -15,8 +15,7 @@ export async function designCommand(
     : path.join(targetDir, 'DESIGN.md');
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   console.log(chalk.cyan('Scanning for design tokens...'));

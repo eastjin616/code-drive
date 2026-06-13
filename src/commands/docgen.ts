@@ -58,8 +58,7 @@ export async function docgenCommand(
   const outputDir = options.output ? path.resolve(options.output) : path.join(targetDir, 'docs');
 
   if (!fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory not found: ${targetDir}`));
-    process.exit(1);
+    throw new Error(`Directory not found: ${targetDir}`);
   }
 
   // Initial generation

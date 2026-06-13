@@ -21,8 +21,7 @@ export async function updateCommand(
       timeout: 10_000,
     }).trim();
   } catch {
-    console.error(chalk.red('npm 레지스트리에 연결할 수 없습니다.'));
-    process.exit(1);
+    throw new Error('npm 레지스트리에 연결할 수 없습니다.');
   }
 
   console.log(chalk.cyan(`최신 버전: v${latestVersion}`));
@@ -45,9 +44,7 @@ export async function updateCommand(
     });
     console.log(chalk.green(`✅ v${latestVersion} 업데이트 완료!`));
   } catch {
-    console.error(chalk.red('업데이트에 실패했습니다.'));
-    console.error(chalk.dim(`직접 실행: npm install -g ${PKG}@latest`));
-    process.exit(1);
+    throw new Error(`업데이트에 실패했습니다.\n직접 실행: npm install -g ${PKG}@latest`);
   }
 }
 

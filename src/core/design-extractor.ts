@@ -177,7 +177,12 @@ function isRadiusValue(value: string): boolean {
   return /^-?\d+(\.\d+)?(px|rem|em|%)$/.test(value.trim()) || value.trim() === '9999px';
 }
 
-function extractConstantObject(content: string, filePath: string): Partial<DesignTokens> {
+function stripComments(code: string): string {
+  return code.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+}
+
+function extractConstantObject(rawContent: string, filePath: string): Partial<DesignTokens> {
+  const content = stripComments(rawContent);
   const result: Partial<DesignTokens> = {};
   const colors: DesignColor[] = [];
   const spacing: DesignSpacing[] = [];
