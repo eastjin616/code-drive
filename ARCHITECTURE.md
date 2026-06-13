@@ -4,10 +4,10 @@
 
 ## Overview
 
-- **Source files:** 15
+- **Source files:** 16
 - **Entry points:** vitest.config.ts
 - **Dependencies:** 7
-- **Exported functions:** 20
+- **Exported functions:** 21
 - **Exported classes:** 1
 - **Exported interfaces:** 9
 
@@ -43,12 +43,14 @@
 | `src/tui.ts` | `./commands/docgen.js` | { docgenCommand } |
 | `src/tui.ts` | `./commands/spec.js` | { specCommand } |
 | `src/tui.ts` | `./commands/review.js` | { reviewCommand } |
+| `src/tui.ts` | `./commands/uninstall.js` | { uninstallCommand } |
 | `src/cli.ts` | `commander` | { Command } |
 | `src/cli.ts` | `chalk` | chalk |
 | `src/cli.ts` | `./commands/init.js` | { initCommand } |
 | `src/cli.ts` | `./commands/docgen.js` | { docgenCommand } |
 | `src/cli.ts` | `./commands/spec.js` | { specCommand } |
 | `src/cli.ts` | `./commands/review.js` | { reviewCommand } |
+| `src/cli.ts` | `./commands/uninstall.js` | { uninstallCommand } |
 | `src/cli.ts` | `./tui.js` | { runTUI } |
 | `src/core/generator.ts` | `node:fs` | * as fs |
 | `src/core/generator.ts` | `node:path` | * as path |
@@ -64,16 +66,14 @@
 | `src/core/analyzer.ts` | `node:path` | * as path |
 | `src/core/analyzer.ts` | `typescript` | ts |
 | `src/core/analyzer.ts` | `glob` | { globSync } |
+| `src/commands/uninstall.ts` | `node:fs` | * as fs |
+| `src/commands/uninstall.ts` | `node:path` | * as path |
+| `src/commands/uninstall.ts` | `chalk` | chalk |
 | `src/commands/spec.ts` | `node:fs` | * as fs |
 | `src/commands/spec.ts` | `node:path` | * as path |
 | `src/commands/spec.ts` | `chalk` | chalk |
 | `src/commands/spec.ts` | `../core/analyzer.js` | { analyzeProject, analyzeSourceFiles } |
-| `src/commands/spec.ts` | `../core/generator.js` | { generateArchitectureSpec, writeDocs } |
-| `src/commands/review.ts` | `node:fs` | * as fs |
-| `src/commands/review.ts` | `node:path` | * as path |
-| `src/commands/review.ts` | `chalk` | chalk |
-| `src/commands/review.ts` | `../core/analyzer.js` | { analyzeAll } |
-| _… and 12 more imports_ | | |
+| _… and 17 more imports_ | | |
 
 ## Module Map
 
@@ -89,6 +89,7 @@
 - `src/cli.ts`
 - `src/core/generator.ts`
 - `src/core/analyzer.ts`
+- `src/commands/uninstall.ts`
 - `src/commands/spec.ts`
 - `src/commands/review.ts`
 - `src/commands/init.ts`

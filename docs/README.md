@@ -6,7 +6,7 @@
 
 - **Version:** 0.1.0
 - **Language:** typescript
-- **Source files:** 15
+- **Source files:** 16
 - **Entry points:** vitest.config.ts
 
 ## Dependencies
@@ -27,8 +27,8 @@
 | `add` | `tests/fixtures/sample-project/src/index.ts:6` | a: number, b: number | number |
 | `subtract` | `tests/fixtures/sample-project/src/index.ts:11` | a: number, b: number | — |
 | `greet` | `tests/fixtures/sample-project/src/index.ts:21` | name: string | string |
-| `runTUI` | `src/tui.ts:33` |  | Promise<void> |
-| `runCLI` | `src/cli.ts:13` | argv: string[] = process.argv | void |
+| `runTUI` | `src/tui.ts:34` |  | Promise<void> |
+| `runCLI` | `src/cli.ts:14` | argv: string[] = process.argv | void |
 | `generateReadmeDocs` | `src/core/generator.ts:21` | project: ProjectInfo, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[], annotations: CodeAnnotation[] | string |
 | `generateApiDocs` | `src/core/generator.ts:114` | filePath: string, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[] | string |
 | `generateArchitectureSpec` | `src/core/generator.ts:201` | project: ProjectInfo, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[], imports: ImportEdge[] | string |
@@ -38,6 +38,7 @@
 | `analyzeSourceFiles` | `src/core/analyzer.ts:251` | dir: string | { functions: FunctionDecl[]; classes: ClassDecl[]; interfaces: InterfaceDecl[]; imports: ImportEdge[]; } |
 | `extractAnnotations` | `src/core/analyzer.ts:288` | dir: string | CodeAnnotation[] |
 | `analyzeAll` | `src/core/analyzer.ts:322` | dir: string | AnalysisResult |
+| `uninstallCommand` | `src/commands/uninstall.ts:5` | dir: string | Promise<void> |
 | `specCommand` | `src/commands/spec.ts:7` | dir: string, options: { output?: string; full?: boolean } | Promise<void> |
 | `reviewCommand` | `src/commands/review.ts:117` | dir: string, options: { output?: string } | Promise<void> |
 | `initCommand` | `src/commands/init.ts:7` | dir: string, options: { force?: boolean } | Promise<void> |
