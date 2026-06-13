@@ -6,13 +6,14 @@ import { initCommand } from './commands/init.js';
 import { docgenCommand } from './commands/docgen.js';
 import { specCommand } from './commands/spec.js';
 import { reviewCommand } from './commands/review.js';
+import { uninstallCommand } from './commands/uninstall.js';
 import { runTUI } from './tui.js';
 
 const pkg = { version: '0.1.0', name: 'code-drive' };
 
 export function runCLI(argv: string[] = process.argv): void {
   const cliFlags = ['--cli', '--help', '-h', '-V', '--version'];
-  const subcommands = ['init', 'docgen', 'spec', 'review', 'help'];
+  const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'help'];
   const isCliMode = cliFlags.some((f) => argv.includes(f));
   const hasSubcommand = argv.slice(2).some((a) => subcommands.includes(a));
 
@@ -67,6 +68,14 @@ export function runCLI(argv: string[] = process.argv): void {
     .option('-o, --output <path>', 'Save report to file')
     .action(async (dir: string, opts: { output?: string }) => {
       await reviewCommand(dir, opts);
+    });
+
+  program
+    .command('uninstall')
+    .description('Remove all CDD artifacts (.cdd/, ARCHITECTURE.md, docs/) from project')
+    .argument('[directory]', 'Project directory', '.')
+    .action(async (dir: string) => {
+      await uninstallCommand(dir);
     });
 
   program.parse(argv);

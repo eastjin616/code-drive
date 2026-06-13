@@ -6,6 +6,7 @@ import { initCommand } from './commands/init.js';
 import { docgenCommand } from './commands/docgen.js';
 import { specCommand } from './commands/spec.js';
 import { reviewCommand } from './commands/review.js';
+import { uninstallCommand } from './commands/uninstall.js';
 
 // ─── Banner ───────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ export async function runTUI(): Promise<void> {
         { value: 'docgen', label: 'docgen', hint: '코드에서 문서 자동 생성' },
         { value: 'spec', label: 'spec', hint: '아키텍처 스펙 추출' },
         { value: 'review', label: 'review', hint: 'CDD 원칙 코드 감사' },
+        { value: 'uninstall', label: 'uninstall', hint: 'CDD 아티팩트 제거' },
         { value: 'exit', label: 'exit', hint: '종료' },
       ],
     });
@@ -124,6 +126,19 @@ export async function runTUI(): Promise<void> {
           s.stop('리뷰 완료');
         } catch (e) {
           s.stop('리뷰 실패');
+          console.log(chalk.red(`  ✖ ${e}`));
+        }
+        break;
+      }
+
+      case 'uninstall': {
+        const s = spinner();
+        s.start('CDD 제거 중...');
+        try {
+          await uninstallCommand(targetDir);
+          s.stop('제거 완료');
+        } catch (e) {
+          s.stop('제거 실패');
           console.log(chalk.red(`  ✖ ${e}`));
         }
         break;
