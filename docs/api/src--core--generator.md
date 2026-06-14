@@ -22,18 +22,6 @@ export function generateApiDocs(filePath: string, functions: FunctionDecl[], cla
 export function generateArchitectureSpec(project: ProjectInfo, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[], imports: ImportEdge[]): string
 ```
 
-### export function `generateCddConfig`
-
-```typescript
-export function generateCddConfig(dir: string): Record<string, unknown>
-```
-
-### function `groupByModule`
-
-```typescript
-function groupByModule(sourceFiles: string[]): ModuleGroup[]
-```
-
 ### export function `writeDocs`
 
 ```typescript
@@ -47,9 +35,3 @@ export function writeDocs(results: DocResult[]): void
 **Members:**
 - `filePath`
 - `content`
-
-### interface `ModuleGroup`
-
-**Members:**
-- `name`
-- `files`

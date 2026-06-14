@@ -6,7 +6,6 @@ import {
   parseGitLog,
   getChangedFiles,
   getCurrentTag,
-  getFirstCommitHash,
 } from '../core/changelog-parser.js';
 import type { Commit } from '../core/changelog-parser.js';
 import {
@@ -34,18 +33,12 @@ export async function changelogCommand(
     : path.join(targetDir, 'CHANGELOG.md');
 
   // Determine version/range
-  let from: string | undefined = options.from;
+  const currentTag = getCurrentTag(targetDir);
+  const from: string | undefined = options.from ?? currentTag ?? undefined;
   const to = options.to ?? 'HEAD';
 
-  if (!from) {
-    from = getCurrentTag(targetDir) ?? getFirstCommitHash(targetDir) ?? undefined;
-  }
-  if (!from) {
-    throw new Error('No commits found in repository');
-  }
-
   // Determine version label for the release section
-  const version = options.from ?? from;
+  const version = options.from ?? currentTag ?? to;
 
   // Parse git log
   console.log(chalk.cyan('Parsing git history...'));

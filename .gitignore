@@ -10,3 +10,5 @@ coverage/
 .idea/
 *.swp
 *.swo
+.omx/
+.omo/

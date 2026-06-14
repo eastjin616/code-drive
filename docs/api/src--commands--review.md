@@ -4,43 +4,29 @@
 
 ## Functions
 
-### function `reviewNaming`
+### function `parseMaxFindings`
 
 ```typescript
-function reviewNaming(functions: ReturnType<typeof analyzeAll>['functions']): ReviewFinding[]
+function parseMaxFindings(raw: string | number | undefined): number
 ```
 
-### function `reviewAnnotations`
+### function `printFindingGroup`
 
 ```typescript
-function reviewAnnotations(annotations: ReturnType<typeof analyzeAll>['annotations']): ReviewFinding[]
-```
-
-### function `reviewDependencies`
-
-```typescript
-function reviewDependencies(imports: ReturnType<typeof analyzeAll>['imports']): ReviewFinding[]
-```
-
-### function `reviewSourceSize`
-
-```typescript
-function reviewSourceSize(sourceFiles: string[], rootDir: string): ReviewFinding[]
+function printFindingGroup(title: string, findings: ReviewFinding[], maxFindings: number, color: (message: string) => string, icon: string): void
 ```
 
 ### export function `reviewCommand`
 
 ```typescript
-export function reviewCommand(dir: string, options: { output?: string }): Promise<void>
+export function reviewCommand(dir: string, options: ReviewOptions): Promise<void>
 ```
 
 ## Interfaces
 
-### interface `ReviewFinding`
+### interface `ReviewOptions`
 
 **Members:**
-- `severity`
-- `rule`
-- `message`
-- `file`
-- `line`
+- `output`
+- `includeTests`
+- `maxFindings`

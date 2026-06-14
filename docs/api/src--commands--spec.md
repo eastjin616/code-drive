@@ -7,5 +7,5 @@
 ### export function `specCommand`
 
 ```typescript
-export function specCommand(dir: string, options: { output?: string; full?: boolean }): Promise<void>
+export function specCommand(dir: string, options: { output?: string; full?: boolean; includeTests?: boolean }): Promise<void>
 ```

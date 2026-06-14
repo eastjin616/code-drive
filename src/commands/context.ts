@@ -1,15 +1,13 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import chalk from 'chalk';
 import { analyzeAll, analyzeProject, analyzeSourceFiles } from '../core/analyzer.js';
+import type { AnalysisScopeOptions } from '../core/analysis-scope.js';
 import type { ImportEdge } from '../core/analyzer.js';
 
-function fmt(num: number): string {
-  return num.toString().padStart(3);
-}
-
-function buildReverseImports(imports: ImportEdge[]): Map<string, { file: string; symbols: string[] }[]> {
-  const map = new Map<string, { file: string; symbols: string[] }[]>();
+function buildReverseImports(
+  imports: readonly ImportEdge[],
+): Map<string, { file: string; symbols: readonly string[] }[]> {
+  const map = new Map<string, { file: string; symbols: readonly string[] }[]>();
   for (const edge of imports) {
     const from = path.normalize(edge.from);
     const to = path.normalize(edge.to.replace(/^\.\//, ''));
@@ -38,10 +36,9 @@ function resolveActualPath(targetDir: string, raw: string): string | null {
 
 // ─── Full project context ─────────────────────────────────────────────
 
-function projectContext(targetDir: string, relativeDir: string): string {
-  const project = analyzeProject(targetDir);
-  const { functions, classes, interfaces, imports, annotations } = analyzeAll(targetDir);
-  const reverseImports = buildReverseImports(imports);
+function projectContext(targetDir: string, relativeDir: string, options: AnalysisScopeOptions): string {
+  const project = analyzeProject(targetDir, options);
+  const { functions, classes, interfaces, imports } = analyzeAll(targetDir, options);
 
   const lines: string[] = [];
   lines.push(`📁 Project: ${project.name} v${project.version} (${project.language})`);
@@ -70,9 +67,11 @@ function projectContext(targetDir: string, relativeDir: string): string {
       let lineCount = 0;
       try {
         lineCount = fs.readFileSync(fullPath, 'utf-8').split('\n').length;
-      } catch {}
+      } catch {
+        lineCount = 0;
+      }
       const fnCount = functions.filter(f => f.file === (prefix + file)).length;
-      const badge = lineCount > 0 ? chalk.dim(` (${lineCount} lines${fnCount > 0 ? `, ${fnCount} fn` : ''})`) : '';
+      const badge = lineCount > 0 ? ` (${lineCount} lines${fnCount > 0 ? `, ${fnCount} fn` : ''})` : '';
       lines.push(`    ${file}${badge}`);
     }
   }
@@ -85,11 +84,11 @@ function projectContext(targetDir: string, relativeDir: string): string {
     for (const fn of exported.slice(0, 20)) {
       const params = fn.params ? `(${fn.params.join(', ')})` : '()';
       const ret = fn.returnType ? `: ${fn.returnType}` : '';
-      const doc = fn.doc ? chalk.dim(`  ${fn.doc}`) : '';
-      lines.push(`  ${fn.name}${params}${ret}  ${chalk.dim(fn.file)}${doc ? ' ' + doc : ''}`);
+      const doc = fn.doc ? `  ${fn.doc}` : '';
+      lines.push(`  ${fn.name}${params}${ret}  ${fn.file}${doc ? ' ' + doc : ''}`);
     }
     if (exported.length > 20) {
-      lines.push(chalk.dim(`  ... and ${exported.length - 20} more`));
+      lines.push(`  ... and ${exported.length - 20} more`);
     }
     lines.push('');
   }
@@ -99,7 +98,7 @@ function projectContext(targetDir: string, relativeDir: string): string {
     lines.push('── Classes ──');
     for (const cls of classes) {
       const methods = cls.methods?.length ? ` [methods: ${cls.methods.join(', ')}]` : '';
-      lines.push(`  ${cls.name}${cls.extendsClause ? ` extends ${cls.extendsClause}` : ''}  ${chalk.dim(cls.file)}${methods}`);
+      lines.push(`  ${cls.name}${cls.extendsClause ? ` extends ${cls.extendsClause}` : ''}  ${cls.file}${methods}`);
     }
     lines.push('');
   }
@@ -116,8 +115,8 @@ function projectContext(targetDir: string, relativeDir: string): string {
 
 // ─── Single file context ──────────────────────────────────────────────
 
-function fileContext(targetDir: string, filePath: string): string {
-  const { functions, classes, interfaces, imports } = analyzeSourceFiles(targetDir);
+function fileContext(targetDir: string, filePath: string, options: AnalysisScopeOptions): string {
+  const { functions, classes, interfaces, imports } = analyzeSourceFiles(targetDir, options);
   const reverseImports = buildReverseImports(imports);
 
   const relativeFile = path.relative(targetDir, filePath).replace(/\\/g, '/');
@@ -131,7 +130,9 @@ function fileContext(targetDir: string, filePath: string): string {
     const content = fs.readFileSync(filePath, 'utf-8');
     const lineCount = content.split('\n').length;
     lines.push(`   ${lineCount} lines`);
-  } catch {}
+  } catch {
+    lines.push('   line count unavailable');
+  }
   lines.push('');
 
   // Exports
@@ -142,10 +143,10 @@ function fileContext(targetDir: string, filePath: string): string {
   if (fileFunctions.length > 0) {
     lines.push('── Functions ──');
     for (const fn of fileFunctions) {
-      const exported = fn.exportKind !== 'none' ? chalk.cyan('export ') : '';
+      const exported = fn.exportKind !== 'none' ? 'export ' : '';
       const params = fn.params ? `(${fn.params.join(', ')})` : '()';
       const ret = fn.returnType ? `: ${fn.returnType}` : '';
-      const doc = fn.doc ? chalk.dim(`  // ${fn.doc}`) : '';
+      const doc = fn.doc ? `  // ${fn.doc}` : '';
       lines.push(`  ${exported}${fn.name}${params}${ret}  ${doc}`);
     }
     lines.push('');
@@ -154,7 +155,7 @@ function fileContext(targetDir: string, filePath: string): string {
   if (fileClasses.length > 0) {
     lines.push('── Classes ──');
     for (const cls of fileClasses) {
-      const exported = cls.exportKind !== 'none' ? chalk.cyan('export ') : '';
+      const exported = cls.exportKind !== 'none' ? 'export ' : '';
       lines.push(`  ${exported}${cls.name}`);
       if (cls.methods?.length) {
         lines.push(`    methods: ${cls.methods.join(', ')}`);
@@ -201,8 +202,14 @@ function fileContext(targetDir: string, filePath: string): string {
 
 // ─── Command ──────────────────────────────────────────────────────────
 
-export async function contextCommand(dir: string, options: { file?: string }): Promise<void> {
+export async function contextCommand(
+  dir: string,
+  options: { file?: string; includeTests?: boolean },
+): Promise<void> {
   const targetDir = path.resolve(dir);
+  const analysisOptions: AnalysisScopeOptions = {
+    includeTests: options.includeTests || Boolean(options.file),
+  };
 
   if (!fs.existsSync(targetDir)) {
     throw new Error(`Directory not found: ${targetDir}`);
@@ -213,8 +220,8 @@ export async function contextCommand(dir: string, options: { file?: string }): P
     if (!filePath) {
       throw new Error(`File not found: ${options.file}`);
     }
-    console.log(fileContext(targetDir, filePath));
+    console.log(fileContext(targetDir, filePath, analysisOptions));
   } else {
-    console.log(projectContext(targetDir, dir));
+    console.log(projectContext(targetDir, dir, analysisOptions));
   }
 }

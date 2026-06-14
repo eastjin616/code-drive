@@ -11,6 +11,7 @@ import {
   generateReadmeDocs,
   generateApiDocs,
   generateArchitectureSpec,
+  generateCddConfig,
 } from '../src/core/generator.js';
 
 const sampleProject: ProjectInfo = {
@@ -184,5 +185,35 @@ describe('generateArchitectureSpec', () => {
     expect(doc).toContain('src/index.ts');
     expect(doc).toContain('src/math.ts');
     expect(doc).toContain('add');
+  });
+
+  it('formats module map headings as complete inline code', () => {
+    const doc = generateArchitectureSpec(
+      sampleProject,
+      sampleFunctions,
+      sampleClasses,
+      sampleInterfaces,
+      [],
+    );
+
+    expect(doc).toContain('### `src/`');
+  });
+});
+
+describe('generateCddConfig', () => {
+  it('includes explicit analysis scope defaults', () => {
+    const config = generateCddConfig('/tmp/project');
+
+    expect(config.sourceDir).toBe('src');
+    expect(config.include).toEqual(['src/**/*.{ts,tsx,js,jsx,mjs,py,go,rs,java,kt,swift}']);
+    expect(config.exclude).toEqual([
+      'tests/**',
+      'test/**',
+      'fixtures/**',
+      '**/fixtures/**',
+      '**/__tests__/**',
+      '**/*.test.*',
+      '**/*.spec.*',
+    ]);
   });
 });

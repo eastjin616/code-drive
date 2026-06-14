@@ -10,10 +10,10 @@
 function showBanner(): void
 ```
 
-### function `resolveDir`
+### function `runOne`
 
 ```typescript
-function resolveDir(input: string | symbol): string
+function runOne(cmd: RunnableCmd, targetDir: string): Promise<void>
 ```
 
 ### export function `runTUI`

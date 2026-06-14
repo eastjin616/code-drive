@@ -1,70 +1,26 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import ts from 'typescript';
-import { globSync } from 'glob';
-
-// ─── Types ────────────────────────────────────────────────────────────
-
-export interface ProjectInfo {
-  name: string;
-  version: string;
-  language: string;
-  sourceFiles: string[];
-  entryPoints: string[];
-  dependencies: string[];
-}
-
-export interface FunctionDecl {
-  name: string;
-  file: string;
-  line: number;
-  exportKind: 'export' | 'default' | 'none';
-  params: string[];
-  returnType: string;
-  doc: string;
-}
-
-export interface ClassDecl {
-  name: string;
-  file: string;
-  line: number;
-  exportKind: 'export' | 'default' | 'none';
-  methods: string[];
-  properties: string[];
-  extendsClause: string;
-  doc: string;
-}
-
-export interface InterfaceDecl {
-  name: string;
-  file: string;
-  line: number;
-  exportKind: 'export' | 'none';
-  members: string[];
-  doc: string;
-}
-
-export interface ImportEdge {
-  from: string;
-  to: string;
-  symbols: string[];
-}
-
-export interface CodeAnnotation {
-  file: string;
-  line: number;
-  tag: string;
-  content: string;
-}
-
-export interface AnalysisResult {
-  project: ProjectInfo;
-  functions: FunctionDecl[];
-  classes: ClassDecl[];
-  interfaces: InterfaceDecl[];
-  imports: ImportEdge[];
-  annotations: CodeAnnotation[];
-}
+import { getSourceFiles } from './analysis-scope.js';
+import type { AnalysisScopeOptions } from './analysis-scope.js';
+import type {
+  AnalysisResult,
+  ClassDecl,
+  CodeAnnotation,
+  FunctionDecl,
+  ImportEdge,
+  InterfaceDecl,
+  ProjectInfo,
+} from './analyzer-types.js';
+export type {
+  AnalysisResult,
+  ClassDecl,
+  CodeAnnotation,
+  FunctionDecl,
+  ImportEdge,
+  InterfaceDecl,
+  ProjectInfo,
+} from './analyzer-types.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 
@@ -103,6 +59,14 @@ function getJSDoc(node: ts.Node, _sourceFile: ts.SourceFile): string {
 function getNodeText(node: ts.Node | undefined): string {
   if (!node) return '';
   return node.getText().replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function chooseEntryPoints(sourceFiles: readonly string[], packageMain?: unknown): string[] {
+  if (typeof packageMain === 'string' && packageMain.trim()) return [packageMain];
+
+  const preferred = ['src/index.ts', 'src/index.tsx', 'index.ts', 'index.tsx'];
+  const found = preferred.find((entryPoint) => sourceFiles.includes(entryPoint));
+  return found ? [found] : sourceFiles.slice(0, 1);
 }
 
 // ─── Source File Parser ───────────────────────────────────────────────
@@ -226,14 +190,11 @@ function parseSourceFile(
 
 // ─── Public API ───────────────────────────────────────────────────────
 
-export function analyzeProject(dir: string): ProjectInfo {
+export function analyzeProject(dir: string, options: AnalysisScopeOptions = {}): ProjectInfo {
   const pkgPath = path.join(dir, 'package.json');
   const pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : {};
 
-  const sourceFiles = globSync('**/*.{ts,tsx,js,jsx,mjs,py,go,rs,java,kt,swift}', {
-    cwd: dir,
-    ignore: ['node_modules/**', 'dist/**', 'build/**', '.git/**', 'target/**'],
-  });
+  const sourceFiles = getSourceFiles(dir, '{ts,tsx,js,jsx,mjs,py,go,rs,java,kt,swift}', options);
 
   const detectedLang =
     sourceFiles.length > 0 ? detectLanguage(path.extname(sourceFiles[0])) : 'unknown';
@@ -243,12 +204,12 @@ export function analyzeProject(dir: string): ProjectInfo {
     version: pkg.version || '0.0.0',
     language: detectedLang,
     sourceFiles,
-    entryPoints: pkg.main ? [pkg.main] : sourceFiles.slice(0, 1),
+    entryPoints: chooseEntryPoints(sourceFiles, pkg.main),
     dependencies: Object.keys(pkg.dependencies || {}),
   };
 }
 
-export function analyzeSourceFiles(dir: string): {
+export function analyzeSourceFiles(dir: string, options: AnalysisScopeOptions = {}): {
   functions: FunctionDecl[];
   classes: ClassDecl[];
   interfaces: InterfaceDecl[];
@@ -259,10 +220,7 @@ export function analyzeSourceFiles(dir: string): {
   const allInterfaces: InterfaceDecl[] = [];
   const allImports: ImportEdge[] = [];
 
-  const sourceFiles = globSync('**/*.{ts,tsx}', {
-    cwd: dir,
-    ignore: ['node_modules/**', 'dist/**', 'build/**', '.git/**', 'target/**'],
-  });
+  const sourceFiles = getSourceFiles(dir, '{ts,tsx}', options);
 
   for (const file of sourceFiles) {
     const fullPath = path.join(dir, file);
@@ -285,12 +243,9 @@ export function analyzeSourceFiles(dir: string): {
   };
 }
 
-export function extractAnnotations(dir: string): CodeAnnotation[] {
+export function extractAnnotations(dir: string, options: AnalysisScopeOptions = {}): CodeAnnotation[] {
   const annotations: CodeAnnotation[] = [];
-  const sourceFiles = globSync('**/*.{ts,tsx,js,jsx,py,go,rs,java,kt,swift}', {
-    cwd: dir,
-    ignore: ['node_modules/**', 'dist/**', 'build/**', '.git/**', 'target/**'],
-  });
+  const sourceFiles = getSourceFiles(dir, '{ts,tsx,js,jsx,py,go,rs,java,kt,swift}', options);
 
   for (const file of sourceFiles.slice(0, 50)) {
     const fullPath = path.join(dir, file);
@@ -319,10 +274,10 @@ export function extractAnnotations(dir: string): CodeAnnotation[] {
   return annotations;
 }
 
-export function analyzeAll(dir: string): AnalysisResult {
-  const project = analyzeProject(dir);
-  const { functions, classes, interfaces, imports } = analyzeSourceFiles(dir);
-  const annotations = extractAnnotations(dir);
+export function analyzeAll(dir: string, options: AnalysisScopeOptions = {}): AnalysisResult {
+  const project = analyzeProject(dir, options);
+  const { functions, classes, interfaces, imports } = analyzeSourceFiles(dir, options);
+  const annotations = extractAnnotations(dir, options);
 
   return { project, functions, classes, interfaces, imports, annotations };
 }

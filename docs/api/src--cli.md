@@ -4,6 +4,12 @@
 
 ## Functions
 
+### function `exitOnError`
+
+```typescript
+function exitOnError(fn: (...args: TArgs) => Promise<void>)
+```
+
 ### export function `runCLI`
 
 ```typescript

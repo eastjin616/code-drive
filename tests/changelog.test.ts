@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { classifyCommitType } from '../src/core/changelog-parser.js';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { execSync } from 'node:child_process';
+import { classifyCommitType, parseGitLog } from '../src/core/changelog-parser.js';
+import { changelogCommand } from '../src/commands/changelog.js';
 import {
   buildChangelog,
   formatReleaseSection,
@@ -7,6 +12,17 @@ import {
   formatEntryLine,
 } from '../src/core/changelog-generator.js';
 import type { CommitWithFiles } from '../src/core/changelog-generator.js';
+
+function makeGitRepo(): string {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cdd-changelog-'));
+  execSync('git init -b main', { cwd: dir, stdio: 'pipe' });
+  execSync('git config user.email demo@example.com', { cwd: dir, stdio: 'pipe' });
+  execSync('git config user.name Demo', { cwd: dir, stdio: 'pipe' });
+  fs.writeFileSync(path.join(dir, 'index.ts'), 'export const value = 1;\n', 'utf-8');
+  execSync('git add index.ts', { cwd: dir, stdio: 'pipe' });
+  execSync('git commit -m "feat: initial demo"', { cwd: dir, stdio: 'pipe' });
+  return dir;
+}
 
 // ─── classifyCommitType ───────────────────────────────────────────────
 
@@ -60,6 +76,28 @@ describe('classifyCommitType', () => {
   it('classifies empty message as other', () => {
     const result = classifyCommitType('');
     expect(result.type).toBe('other');
+  });
+});
+
+describe('parseGitLog', () => {
+  it('includes the root commit when no from ref is provided', () => {
+    const dir = makeGitRepo();
+
+    const commits = parseGitLog(undefined, 'HEAD', dir);
+
+    expect(commits.map((commit) => commit.description)).toEqual(['initial demo']);
+  });
+});
+
+describe('changelogCommand', () => {
+  it('generates a changelog for a repository with only a root commit', async () => {
+    const dir = makeGitRepo();
+
+    await changelogCommand(dir, {});
+
+    const changelog = fs.readFileSync(path.join(dir, 'CHANGELOG.md'), 'utf-8');
+    expect(changelog).toContain('initial demo');
+    expect(changelog).toContain('index.ts');
   });
 });
 
@@ -186,6 +224,48 @@ describe('mergeWithExisting', () => {
 
     expect(result).toContain('## [v0.1.0]');
     expect(result).toContain('Just a heading');
+
+    fs.unlinkSync(tmpFile);
+  });
+
+  it('replaces an existing section with the same version', () => {
+    const tmpFile = path.join('/tmp', `changelog-test-${Date.now()}.md`);
+    fs.writeFileSync(tmpFile, [
+      '## [HEAD] — 2026-06-14',
+      '',
+      '### Added',
+      '',
+      '- old entry',
+      '',
+      '## [HEAD] — 2026-06-14',
+      '',
+      '### Added',
+      '',
+      '- older duplicate entry',
+      '',
+      '## [v0.1.0] — 2026-01-01',
+      '',
+      '### Added',
+      '',
+      '- initial release',
+      '',
+    ].join('\n'));
+
+    const newContent = [
+      '## [HEAD] — 2026-06-14',
+      '',
+      '### Added',
+      '',
+      '- new entry',
+      '',
+    ].join('\n');
+    const result = mergeWithExisting(newContent, tmpFile);
+
+    expect(result.match(/## \[HEAD\]/g)).toHaveLength(1);
+    expect(result).toContain('new entry');
+    expect(result).not.toContain('old entry');
+    expect(result).not.toContain('older duplicate entry');
+    expect(result).toContain('initial release');
 
     fs.unlinkSync(tmpFile);
   });

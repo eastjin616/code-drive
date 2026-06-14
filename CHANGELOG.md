@@ -1,3 +1,56 @@
+## [HEAD] — 2026-06-14
+
+### Added
+
+- cdd doctor 명령어 추가 — 프로젝트 건강 상태 진단 (Node/Git/CDD/Artifacts)
+  → src/commands/doctor.ts, src/cli.ts, src/tui.ts
+- cdd verify 명령어 추가 — config, 생성 문서 최신성, AI 라우팅, review 에러를 하나의 release-readiness 상태로 점검
+  → src/core/verify.ts, src/commands/verify.ts, tests/verify.test.ts
+- cdd ai install 명령어 추가 — AGENTS.md/CLAUDE.md/CODEX.md/OPENCODE.md에 CDD 문서 라우팅 블록 설치/복구
+  → src/core/ai-context.ts, src/commands/ai.ts, tests/ai-context.test.ts
+
+### Fixed
+
+- design-extractor: 주석 속 export const RED = '#ff0000' 를 실제 토큰으로 착각하는 false positive 수정
+  → stripComments() 추가로 주석 제거 후 regex 실행
+- 모든 명령어: process.exit(1) 대신 throw Error 로 변경 — TUI에서 실행 시 메뉴 복귀 가능
+  → src/commands/*.ts, src/cli.ts (exitOnError wrapper)
+- color swatch: placehold.co 외부 이미지 → inline HTML span (GitHub/terminal 전부 작동)
+  → src/core/design-generator.ts
+- sync --output: --output ./custom 이 subcommand에 전달 안 되던 버그 수정
+  → src/commands/sync.ts
+- context: chalk ANSI 코드 제거 — AI 프롬프트 출력용 순수 텍스트
+  → src/commands/context.ts (모든 chalk.dim/chalk.cyan 제거)
+- verify: 빈 interface 타입을 alias로 바꿔 lint rule과 타입 의미를 동시에 만족
+  → src/core/verify.ts
+
+### Changed
+
+- cdd update 명령어 추가 — npm 업데이트 및 버전 확인
+  → src/commands/update.ts, src/cli.ts, src/tui.ts
+- init/sync: AI 시작 문서에 CDD context-routing block 자동 설치/갱신
+  → src/commands/init.ts, src/commands/sync.ts, src/core/ai-context.ts
+- uninstall: CDD managed AI block 제거 여부를 yes/no로 묻고, `--remove-ai-context` / `--keep-ai-context` 자동화 옵션 추가
+  → src/commands/uninstall.ts
+- review: CLI 출력 로직과 rule 수집 로직 분리 — verify가 review error 상태를 재사용 가능
+  → src/core/review-rules.ts, src/commands/review.ts
+- TUI 메뉴 개편: uninstall을 맨 아래로 이동, multiselect required: true, 디렉토리 프롬프트 제거
+  → src/tui.ts
+- TUI 메뉴에 verify 추가 — 첫 화면 실행과 권장 전체 흐름에 release-readiness 확인 포함
+  → src/tui.ts
+- TUI 명령 타입을 상수 기반 union으로 좁혀 assertion 없이 실행 순서를 계산
+  → src/tui.ts
+
+### Docs
+
+- README/README.ko: doctor, verify, ai install, uninstall AI block 옵션, TUI 흐름, 최신 CLI 옵션 반영
+  → README.md, README.ko.md
+
+### Cleanup
+
+- context.ts: 미사용 annotations destructure + fmt() 함수 제거
+- design-extractor.ts: 미사용 CSS_VAR_PATTERNS 상수 (23줄) 제거
+
 ## [31fdb7b] — 2026-06-13
 
 ### Added

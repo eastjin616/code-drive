@@ -2,11 +2,12 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import chalk from 'chalk';
 import { analyzeProject, analyzeSourceFiles } from '../core/analyzer.js';
+import type { AnalysisScopeOptions } from '../core/analysis-scope.js';
 import { generateArchitectureSpec, writeDocs } from '../core/generator.js';
 
 export async function specCommand(
   dir: string,
-  options: { output?: string; full?: boolean },
+  options: { output?: string; full?: boolean; includeTests?: boolean },
 ): Promise<void> {
   const targetDir = path.resolve(dir);
   const outputPath = options.output
@@ -19,8 +20,9 @@ export async function specCommand(
 
   console.log(chalk.cyan('Analyzing code architecture...'));
 
-  const project = analyzeProject(targetDir);
-  const { functions, classes, interfaces, imports } = analyzeSourceFiles(targetDir);
+  const analysisOptions: AnalysisScopeOptions = { includeTests: options.includeTests };
+  const project = analyzeProject(targetDir, analysisOptions);
+  const { functions, classes, interfaces, imports } = analyzeSourceFiles(targetDir, analysisOptions);
 
   console.log(chalk.dim(`  ${functions.length} functions`));
   console.log(chalk.dim(`  ${classes.length} classes`));

@@ -3,15 +3,20 @@ import * as path from 'node:path';
 import chalk from 'chalk';
 import { watch } from 'chokidar';
 import { analyzeProject, analyzeSourceFiles, extractAnnotations } from '../core/analyzer.js';
+import type { AnalysisScopeOptions } from '../core/analysis-scope.js';
 import { generateReadmeDocs, generateApiDocs, writeDocs } from '../core/generator.js';
 import type { DocResult } from '../core/generator.js';
 
 // ─── Doc Generation ───────────────────────────────────────────────────
 
-export function generateDocs(targetDir: string, outputDir: string): DocResult[] {
-  const project = analyzeProject(targetDir);
-  const { functions, classes, interfaces } = analyzeSourceFiles(targetDir);
-  const annotations = extractAnnotations(targetDir);
+export function generateDocs(
+  targetDir: string,
+  outputDir: string,
+  options: AnalysisScopeOptions = {},
+): DocResult[] {
+  const project = analyzeProject(targetDir, options);
+  const { functions, classes, interfaces } = analyzeSourceFiles(targetDir, options);
+  const annotations = extractAnnotations(targetDir, options);
 
   // README
   const readme = generateReadmeDocs(project, functions, classes, interfaces, annotations);
@@ -52,10 +57,11 @@ export function generateDocs(targetDir: string, outputDir: string): DocResult[] 
 
 export async function docgenCommand(
   dir: string,
-  options: { output?: string; watch?: boolean },
+  options: { output?: string; watch?: boolean; includeTests?: boolean },
 ): Promise<void> {
   const targetDir = path.resolve(dir);
   const outputDir = options.output ? path.resolve(options.output) : path.join(targetDir, 'docs');
+  const analysisOptions: AnalysisScopeOptions = { includeTests: options.includeTests };
 
   if (!fs.existsSync(targetDir)) {
     throw new Error(`Directory not found: ${targetDir}`);
@@ -64,12 +70,12 @@ export async function docgenCommand(
   // Initial generation
   console.log(chalk.cyan('Scanning codebase...'));
 
-  const results = generateDocs(targetDir, outputDir);
+  const results = generateDocs(targetDir, outputDir, analysisOptions);
   writeDocs(results);
 
-  const project = analyzeProject(targetDir);
-  const { functions, classes, interfaces } = analyzeSourceFiles(targetDir);
-  const annotations = extractAnnotations(targetDir);
+  const project = analyzeProject(targetDir, analysisOptions);
+  const { functions, classes, interfaces } = analyzeSourceFiles(targetDir, analysisOptions);
+  const annotations = extractAnnotations(targetDir, analysisOptions);
 
   console.log(
     chalk.dim(
@@ -96,7 +102,7 @@ export async function docgenCommand(
     const generate = () => {
       const start = Date.now();
       console.log(chalk.dim('\nChange detected, regenerating...'));
-      const newResults = generateDocs(targetDir, outputDir);
+      const newResults = generateDocs(targetDir, outputDir, analysisOptions);
       writeDocs(newResults);
       const elapsed = Date.now() - start;
       console.log(chalk.green(`✓ Regenerated ${newResults.length} files (${elapsed}ms)`));

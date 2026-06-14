@@ -7,7 +7,13 @@
 ### export function `uninstallCommand`
 
 ```typescript
-export function uninstallCommand(dir: string): Promise<void>
+export function uninstallCommand(dir: string, options: UninstallOptions = {}): Promise<void>
+```
+
+### function `askRemoveAiContext`
+
+```typescript
+function askRemoveAiContext(aiContextFiles: readonly string[]): Promise<boolean>
 ```
 
 ### function `countFiles`
@@ -15,3 +21,10 @@ export function uninstallCommand(dir: string): Promise<void>
 ```typescript
 function countFiles(dir: string): number
 ```
+
+## Interfaces
+
+### interface `UninstallOptions`
+
+**Members:**
+- `removeAiContext`

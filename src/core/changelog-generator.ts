@@ -1,5 +1,4 @@
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import type { Commit, CommitType } from './changelog-parser.js';
 
 // ─── Types ────────────────────────────────────────────────────────────
@@ -155,20 +154,40 @@ export function mergeWithExisting(
     return newContent;
   }
 
-  // Find first version header (## [) — insert new content before it
-  const versionHeaderIndex = existing.search(/^## \[/m);
+  const newVersion = newContent.match(/^## \[([^\]]+)\]/m)?.[1];
+  const existingWithoutDuplicate = newVersion
+    ? removeVersionSection(existing, newVersion)
+    : existing;
+
+  const versionHeaderIndex = existingWithoutDuplicate.search(/^## \[/m);
   if (versionHeaderIndex === -1) {
-    // No version headers yet — prepend to top
-    return newContent + '\n\n' + existing;
+    const trimmedExisting = existingWithoutDuplicate.trim();
+    return trimmedExisting ? `${newContent}\n\n${trimmedExisting}` : newContent;
   }
 
-  return (
-    newContent +
-    '\n\n' +
-    existing.slice(0, versionHeaderIndex).trimEnd() +
-    '\n\n' +
-    existing.slice(versionHeaderIndex)
-  );
+  const preamble = existingWithoutDuplicate.slice(0, versionHeaderIndex).trimEnd();
+  const remainingSections = existingWithoutDuplicate.slice(versionHeaderIndex).trimStart();
+  return [preamble, newContent, remainingSections].filter(Boolean).join('\n\n');
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function removeVersionSection(content: string, version: string): string {
+  const headerPattern = new RegExp(`^## \\[${escapeRegExp(version)}\\][^\\n]*(?:\\n|$)`, 'm');
+  let result = content;
+
+  while (true) {
+    const match = headerPattern.exec(result);
+    if (!match || match.index === undefined) return result;
+
+    const start = match.index;
+    const afterHeader = start + match[0].length;
+    const nextHeaderOffset = result.slice(afterHeader).search(/^## \[/m);
+    const end = nextHeaderOffset === -1 ? result.length : afterHeader + nextHeaderOffset;
+    result = `${result.slice(0, start).trimEnd()}\n\n${result.slice(end).trimStart()}`.trim();
+  }
 }
 
 // ─── Full Pipeline ────────────────────────────────────────────────────

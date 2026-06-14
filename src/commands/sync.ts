@@ -5,10 +5,11 @@ import { docgenCommand } from './docgen.js';
 import { specCommand } from './spec.js';
 import { designCommand } from './design.js';
 import { changelogCommand } from './changelog.js';
+import { installAiContext } from '../core/ai-context.js';
 
 export async function syncCommand(
   dir: string,
-  options: { output?: string } = {},
+  options: { output?: string; includeTests?: boolean } = {},
 ): Promise<void> {
   const targetDir = path.resolve(dir);
 
@@ -16,7 +17,9 @@ export async function syncCommand(
     throw new Error(`Directory not found: ${targetDir}`);
   }
 
-  const outputOpt = options.output ? { output: options.output } : {};
+  const outputOpt = options.output
+    ? { output: options.output, includeTests: options.includeTests }
+    : { includeTests: options.includeTests };
 
   const steps = [
     { name: 'docgen', label: '문서 생성', fn: () => docgenCommand(targetDir, outputOpt) },
@@ -37,5 +40,7 @@ export async function syncCommand(
     }
   }
 
+  const aiContext = installAiContext(targetDir);
+  console.log(chalk.dim(`AI context routing: ${aiContext.targetFiles.join(', ')}`));
   console.log(chalk.green.bold('✅ CDD Sync 완료 — 모든 아티팩트가 생성되었습니다.'));
 }

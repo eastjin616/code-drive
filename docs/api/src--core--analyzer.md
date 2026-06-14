@@ -22,6 +22,12 @@ function getJSDoc(node: ts.Node, _sourceFile: ts.SourceFile): string
 function getNodeText(node: ts.Node | undefined): string
 ```
 
+### function `chooseEntryPoints`
+
+```typescript
+function chooseEntryPoints(sourceFiles: readonly string[], packageMain?: unknown): string[]
+```
+
 ### function `parseSourceFile`
 
 ```typescript
@@ -37,93 +43,23 @@ function visit(node: ts.Node)
 ### export function `analyzeProject`
 
 ```typescript
-export function analyzeProject(dir: string): ProjectInfo
+export function analyzeProject(dir: string, options: AnalysisScopeOptions = {}): ProjectInfo
 ```
 
 ### export function `analyzeSourceFiles`
 
 ```typescript
-export function analyzeSourceFiles(dir: string): { functions: FunctionDecl[]; classes: ClassDecl[]; interfaces: InterfaceDecl[]; imports: ImportEdge[]; }
+export function analyzeSourceFiles(dir: string, options: AnalysisScopeOptions = {}): { functions: FunctionDecl[]; classes: ClassDecl[]; interfaces: InterfaceDecl[]; imports: ImportEdge[]; }
 ```
 
 ### export function `extractAnnotations`
 
 ```typescript
-export function extractAnnotations(dir: string): CodeAnnotation[]
+export function extractAnnotations(dir: string, options: AnalysisScopeOptions = {}): CodeAnnotation[]
 ```
 
 ### export function `analyzeAll`
 
 ```typescript
-export function analyzeAll(dir: string): AnalysisResult
+export function analyzeAll(dir: string, options: AnalysisScopeOptions = {}): AnalysisResult
 ```
-
-## Interfaces
-
-### export interface `ProjectInfo`
-
-**Members:**
-- `name`
-- `version`
-- `language`
-- `sourceFiles`
-- `entryPoints`
-- `dependencies`
-
-### export interface `FunctionDecl`
-
-**Members:**
-- `name`
-- `file`
-- `line`
-- `exportKind`
-- `params`
-- `returnType`
-- `doc`
-
-### export interface `ClassDecl`
-
-**Members:**
-- `name`
-- `file`
-- `line`
-- `exportKind`
-- `methods`
-- `properties`
-- `extendsClause`
-- `doc`
-
-### export interface `InterfaceDecl`
-
-**Members:**
-- `name`
-- `file`
-- `line`
-- `exportKind`
-- `members`
-- `doc`
-
-### export interface `ImportEdge`
-
-**Members:**
-- `from`
-- `to`
-- `symbols`
-
-### export interface `CodeAnnotation`
-
-**Members:**
-- `file`
-- `line`
-- `tag`
-- `content`
-
-### export interface `AnalysisResult`
-
-**Members:**
-- `project`
-- `functions`
-- `classes`
-- `interfaces`
-- `imports`
-- `annotations`

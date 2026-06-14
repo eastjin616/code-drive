@@ -12,6 +12,8 @@ import { contextCommand } from './commands/context.js';
 import { designCommand } from './commands/design.js';
 import { changelogCommand } from './commands/changelog.js';
 import { updateCommand } from './commands/update.js';
+import { doctorCommand } from './commands/doctor.js';
+import { verifyCommand } from './commands/verify.js';
 
 // ─── Banner ───────────────────────────────────────────────────────────
 
@@ -29,7 +31,7 @@ function showBanner(): void {
 
 // ─── Labels ───────────────────────────────────────────────────────────
 
-const labels: Record<string, string> = {
+const labels = {
   init: 'init',
   docgen: 'docgen',
   spec: 'spec',
@@ -39,9 +41,11 @@ const labels: Record<string, string> = {
   context: 'context',
   uninstall: 'uninstall',
   update: 'update',
-};
+  doctor: 'doctor',
+  verify: 'verify',
+} as const;
 
-const labelKor: Record<string, string> = {
+const labelKor = {
   init: 'CDD 설정 초기화',
   docgen: 'docs/README.md, docs/api/',
   spec: 'ARCHITECTURE.md',
@@ -51,15 +55,18 @@ const labelKor: Record<string, string> = {
   context: 'AI 프롬프트용 컨텍스트 출력',
   uninstall: 'CDD 아티팩트 제거',
   update: 'cdd 자체 업데이트',
-};
+  doctor: '프로젝트 상태 진단',
+  verify: '릴리즈 준비 상태 확인',
+} as const;
 
 type Cmd = keyof typeof labels;
+type RunnableCmd = Exclude<Cmd, 'update'>;
 
-const EXEC_ORDER: Cmd[] = ['init', 'docgen', 'spec', 'design', 'changelog', 'review', 'context', 'uninstall'];
+const EXEC_ORDER: RunnableCmd[] = ['doctor', 'init', 'docgen', 'spec', 'design', 'changelog', 'review', 'verify', 'context', 'uninstall'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 
-async function runOne(cmd: Cmd, targetDir: string): Promise<void> {
+async function runOne(cmd: RunnableCmd, targetDir: string): Promise<void> {
   const s = spinner();
   const startMsg: Record<string, string> = {
     init: '초기화 중...',
@@ -70,6 +77,8 @@ async function runOne(cmd: Cmd, targetDir: string): Promise<void> {
     uninstall: 'CDD 제거 중...',
     design: '디자인 토큰 추출 중...',
     changelog: 'Git 히스토리 분석 중...',
+    doctor: '프로젝트 상태 확인 중...',
+    verify: '릴리즈 준비 상태 확인 중...',
   };
   const doneMsg: Record<string, string> = {
     init: '초기화 완료',
@@ -80,6 +89,8 @@ async function runOne(cmd: Cmd, targetDir: string): Promise<void> {
     uninstall: '제거 완료',
     design: '디자인 스펙 생성 완료',
     changelog: '체인지로그 생성 완료',
+    doctor: '진단 완료',
+    verify: '검증 완료',
   };
 
   const outputFiles: Record<string, string | undefined> = {
@@ -98,9 +109,10 @@ async function runOne(cmd: Cmd, targetDir: string): Promise<void> {
       ],
     });
     if (isCancel(force)) return;
+    if (typeof force !== 'boolean') return;
     s.start(startMsg[cmd]);
     try {
-      await initCommand(targetDir, { force: force as boolean });
+      await initCommand(targetDir, { force });
       s.stop(chalk.green(doneMsg[cmd]));
     } catch (e) {
       s.stop(chalk.red(doneMsg[cmd] + ' 실패'));
@@ -111,7 +123,7 @@ async function runOne(cmd: Cmd, targetDir: string): Promise<void> {
 
   s.start(startMsg[cmd]);
   try {
-    const fn = {
+    const runners: Record<Exclude<RunnableCmd, 'init'>, () => Promise<void>> = {
       docgen: () => docgenCommand(targetDir, {}),
       spec: () => specCommand(targetDir, {}),
       review: () => reviewCommand(targetDir, {}),
@@ -119,8 +131,10 @@ async function runOne(cmd: Cmd, targetDir: string): Promise<void> {
       uninstall: () => uninstallCommand(targetDir),
       design: () => designCommand(targetDir, {}),
       changelog: () => changelogCommand(targetDir, {}),
-    }[cmd]!();
-    await fn;
+      doctor: () => doctorCommand(targetDir),
+      verify: () => verifyCommand(targetDir, {}),
+    };
+    await runners[cmd]();
     s.stop(chalk.green(doneMsg[cmd]));
   } catch (e) {
     s.stop(chalk.red(doneMsg[cmd] + ' 실패'));
@@ -157,7 +171,9 @@ export async function runTUI(): Promise<void> {
     const mode = await select({
       message: '실행할 내용을 선택하세요',
       options: [
-        { value: 'cmds', label: '명령어 실행', hint: 'docgen, spec, design, changelog, review, context' },
+        { value: 'doctor', label: '추천 워크플로 시작', hint: 'doctor로 상태 진단 후 다음 액션 확인' },
+        { value: 'verify', label: '릴리즈 준비 확인', hint: 'config, 생성 문서, AI 라우팅, 리뷰 에러 확인' },
+        { value: 'cmds', label: '명령어 직접 실행', hint: 'docgen, spec, design, changelog, review, verify, context' },
         { value: 'init', label: 'init', hint: 'CDD 설정 초기화' },
         { value: 'update', label: 'update', hint: 'cdd 자체 업데이트' },
         { value: 'uninstall', label: 'uninstall', hint: 'CDD 아티팩트 제거' },
@@ -169,7 +185,7 @@ export async function runTUI(): Promise<void> {
       process.exit(0);
     }
 
-    if (mode === 'init' || mode === 'uninstall' || mode === 'update') {
+    if (mode === 'init' || mode === 'doctor' || mode === 'verify' || mode === 'uninstall' || mode === 'update') {
       console.log('');
       await (mode === 'update'
         ? updateCommand('.', {})
@@ -195,7 +211,11 @@ export async function runTUI(): Promise<void> {
       message: '실행할 명령어를 선택하세요 (스페이스: 선택, 엔터: 실행)',
       options: {
         '⚡ 전체 선택': [
-          { value: '__all__', label: '모두 선택', hint: 'docgen + spec + design + changelog + review + context' },
+          { value: '__all__', label: '권장 전체 흐름', hint: 'doctor + 생성 + 리뷰 + verify + context' },
+        ],
+        '🩺 진단': [
+          { value: 'doctor', hint: '프로젝트 상태와 다음 액션' },
+          { value: 'verify', hint: '릴리즈 준비 상태와 필요한 조치' },
         ],
         '📄 생성': [
           { value: 'docgen', hint: 'docs/README.md, docs/api/' },
@@ -217,13 +237,14 @@ export async function runTUI(): Promise<void> {
       process.exit(0);
     }
 
-    let selected = raw as string[];
+    let selected = raw.filter((value) => typeof value === 'string');
     if (selected.includes('__all__')) {
-      selected = ['docgen', 'spec', 'design', 'changelog', 'review', 'context'];
+      selected = ['doctor', 'docgen', 'spec', 'design', 'changelog', 'review', 'verify', 'context'];
     }
     const targetDir = process.cwd();
     console.log('');
-    const ordered = EXEC_ORDER.filter((c) => selected.includes(c));
+    const selectedSet = new Set(selected);
+    const ordered = EXEC_ORDER.filter((c) => c !== 'init' && c !== 'uninstall' && selectedSet.has(c));
     for (const cmd of ordered) {
       log.step(`${chalk.bold(labels[cmd])} — ${labelKor[cmd]}`);
       await runOne(cmd, targetDir);

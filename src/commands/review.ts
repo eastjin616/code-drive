@@ -1,121 +1,50 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import chalk from 'chalk';
-import { analyzeAll } from '../core/analyzer.js';
+import type { AnalysisScopeOptions } from '../core/analysis-scope.js';
+import { collectReviewFindings } from '../core/review-rules.js';
+import type { ReviewFinding } from '../core/review-rules.js';
 
-interface ReviewFinding {
-  severity: 'error' | 'warn' | 'info';
-  rule: string;
-  message: string;
-  file?: string;
-  line?: number;
+interface ReviewOptions {
+  readonly output?: string;
+  readonly includeTests?: boolean;
+  readonly maxFindings?: string | number;
 }
 
-// ─── CDD Review Rules ─────────────────────────────────────────────────
+function parseMaxFindings(raw: string | number | undefined): number {
+  if (typeof raw === 'number' && Number.isFinite(raw)) return Math.max(1, Math.floor(raw));
+  if (typeof raw !== 'string') return 20;
 
-function reviewNaming(functions: ReturnType<typeof analyzeAll>['functions']): ReviewFinding[] {
-  const findings: ReviewFinding[] = [];
-  for (const fn of functions) {
-    if (fn.name.startsWith('_') && fn.exportKind === 'export') {
-      findings.push({
-        severity: 'warn',
-        rule: 'naming',
-        message: `Exported function "${fn.name}" starts with underscore — likely internal naming leaked to public API.`,
-        file: fn.file,
-        line: fn.line,
-      });
-    }
-    if (!fn.doc && fn.exportKind !== 'none' && !fn.name.startsWith('_')) {
-      findings.push({
-        severity: 'info',
-        rule: 'documentation',
-        message: `Exported function "${fn.name}" has no JSDoc/TSDoc comment.`,
-        file: fn.file,
-        line: fn.line,
-      });
-    }
-  }
-  return findings;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) ? Math.max(1, parsed) : 20;
 }
 
-function reviewAnnotations(
-  annotations: ReturnType<typeof analyzeAll>['annotations'],
-): ReviewFinding[] {
-  const findings: ReviewFinding[] = [];
-  const todos = annotations.filter((a) => a.tag === 'todo');
-  const fixmes = annotations.filter((a) => a.tag === 'fixme');
-  const hacks = annotations.filter((a) => a.tag === 'hack');
+function printFindingGroup(
+  title: string,
+  findings: ReviewFinding[],
+  maxFindings: number,
+  color: (message: string) => string,
+  icon: string,
+): void {
+  if (findings.length === 0) return;
 
-  for (const ann of [...todos, ...fixmes, ...hacks]) {
-    findings.push({
-      severity: 'warn',
-      rule: 'code-health',
-      message: `${ann.tag.toUpperCase()}: ${ann.content}`,
-      file: ann.file,
-      line: ann.line,
-    });
+  console.log(color(`${title} (${findings.length}):`));
+  for (const finding of findings.slice(0, maxFindings)) {
+    const loc = finding.file ? chalk.dim(` [${finding.file}${finding.line ? `:${finding.line}` : ''}]`) : '';
+    console.log(`  ${color(icon)} ${finding.message}${loc}`);
   }
-  return findings;
-}
-
-function reviewDependencies(imports: ReturnType<typeof analyzeAll>['imports']): ReviewFinding[] {
-  const findings: ReviewFinding[] = [];
-  const localImports = imports.filter((i) => i.to.startsWith('.') || i.to.startsWith('/'));
-  const extImports = imports.filter((i) => !i.to.startsWith('.') && !i.to.startsWith('/'));
-
-  // Check for excessive external dependencies in small modules
-  if (extImports.length > 0 && localImports.length === 0) {
-    findings.push({
-      severity: 'warn',
-      rule: 'dependency-management',
-      message: `File "${imports[0]?.from ?? '?'}" has ${extImports.length} external imports but no local imports — may indicate missing abstraction layer.`,
-    });
+  if (findings.length > maxFindings) {
+    console.log(chalk.dim(`  ... ${findings.length - maxFindings} more hidden; use --max-findings ${findings.length} to show all`));
   }
-
-  // Circular dependency detection
-  const pairs = new Set<string>();
-  for (const edge of imports) {
-    const key = `${edge.from}->${edge.to}`;
-    if (pairs.has(`${edge.to}->${edge.from}`)) {
-      findings.push({
-        severity: 'error',
-        rule: 'circular-dependency',
-        message: `Circular dependency detected between "${edge.from}" and "${edge.to}".`,
-        file: edge.from,
-      });
-    }
-    pairs.add(key);
-  }
-
-  return findings;
-}
-
-function reviewSourceSize(sourceFiles: string[], rootDir: string): ReviewFinding[] {
-  const findings: ReviewFinding[] = [];
-  for (const file of sourceFiles.slice(0, 100)) {
-    try {
-      const fullPath = path.join(rootDir, file);
-      const lines = fs.readFileSync(fullPath, 'utf-8').split('\n').length;
-
-      if (lines > 500) {
-        findings.push({
-          severity: 'warn',
-          rule: 'module-size',
-          message: `File "${file}" has ${lines} lines (recommended: <500). Consider splitting.`,
-          file,
-        });
-      }
-    } catch {
-      // skip
-    }
-  }
-  return findings;
+  console.log('');
 }
 
 // ─── Command ──────────────────────────────────────────────────────────
 
-export async function reviewCommand(dir: string, options: { output?: string }): Promise<void> {
+export async function reviewCommand(dir: string, options: ReviewOptions): Promise<void> {
   const targetDir = path.resolve(dir);
+  const analysisOptions: AnalysisScopeOptions = { includeTests: options.includeTests };
+  const maxFindings = parseMaxFindings(options.maxFindings);
 
   if (!fs.existsSync(targetDir)) {
     throw new Error(`Directory not found: ${targetDir}`);
@@ -123,14 +52,8 @@ export async function reviewCommand(dir: string, options: { output?: string }): 
 
   console.log(chalk.cyan('Running CDD review...'));
 
-  const { project, functions, classes, interfaces, imports, annotations } = analyzeAll(targetDir);
-
-  const findings: ReviewFinding[] = [
-    ...reviewNaming(functions),
-    ...reviewAnnotations(annotations),
-    ...reviewDependencies(imports),
-    ...reviewSourceSize(project.sourceFiles, targetDir),
-  ];
+  const summary = collectReviewFindings(targetDir, analysisOptions);
+  const findings = summary.findings;
 
   // ── Summary ──
   const errors = findings.filter((f) => f.severity === 'error');
@@ -138,10 +61,10 @@ export async function reviewCommand(dir: string, options: { output?: string }): 
   const infos = findings.filter((f) => f.severity === 'info');
 
   console.log('');
-  console.log(chalk.bold(`CDD Review — ${project.name} v${project.version}`));
+  console.log(chalk.bold(`CDD Review — ${summary.projectName} v${summary.version}`));
   console.log(
     chalk.dim(
-      `  ${functions.length} functions, ${classes.length} classes, ${interfaces.length} interfaces`,
+      `  ${summary.functionCount} functions, ${summary.classCount} classes, ${summary.interfaceCount} interfaces`,
     ),
   );
   console.log('');
@@ -151,37 +74,14 @@ export async function reviewCommand(dir: string, options: { output?: string }): 
     return;
   }
 
-  if (errors.length > 0) {
-    console.log(chalk.bold.red(`Errors (${errors.length}):`));
-    for (const e of errors) {
-      const loc = e.file ? chalk.dim(` [${e.file}${e.line ? `:${e.line}` : ''}]`) : '';
-      console.log(`  ${chalk.red('✖')} ${e.message}${loc}`);
-    }
-    console.log('');
-  }
-
-  if (warnings.length > 0) {
-    console.log(chalk.bold.yellow(`Warnings (${warnings.length}):`));
-    for (const w of warnings) {
-      const loc = w.file ? chalk.dim(` [${w.file}${w.line ? `:${w.line}` : ''}]`) : '';
-      console.log(`  ${chalk.yellow('⚠')} ${w.message}${loc}`);
-    }
-    console.log('');
-  }
-
-  if (infos.length > 0) {
-    console.log(chalk.bold.cyan(`Info (${infos.length}):`));
-    for (const i of infos) {
-      const loc = i.file ? chalk.dim(` [${i.file}${i.line ? `:${i.line}` : ''}]`) : '';
-      console.log(`  ${chalk.cyan('ℹ')} ${i.message}${loc}`);
-    }
-    console.log('');
-  }
+  printFindingGroup('Errors', errors, maxFindings, chalk.bold.red, '✖');
+  printFindingGroup('Warnings', warnings, maxFindings, chalk.bold.yellow, '⚠');
+  printFindingGroup('Info', infos, maxFindings, chalk.bold.cyan, 'ℹ');
 
   if (options.output) {
     const outputPath = path.resolve(options.output);
     const reportLines: string[] = [
-      `# CDD Review Report — ${project.name}`,
+      `# CDD Review Report — ${summary.projectName}`,
       '',
       `**${findings.length} findings:** ${errors.length} errors, ${warnings.length} warnings, ${infos.length} info`,
       '',

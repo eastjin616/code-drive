@@ -105,7 +105,7 @@ function parseCommitBlock(block: string): Commit | null {
 export function getChangedFiles(hash: string, dir = '.'): string[] {
   try {
     const output = execSync(
-      `git diff-tree --no-commit-id -r --name-only ${hash}`,
+      `git diff-tree --root --no-commit-id -r --name-only ${hash}`,
       { cwd: dir, encoding: 'utf-8', stdio: 'pipe' },
     );
     return output.trim().split('\n').filter(Boolean);

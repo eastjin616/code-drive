@@ -52,7 +52,10 @@ CDD is a **developer tool** and **methodology** that:
 | 📖 **Doc Gen** | `cdd docgen` | Extract API docs, READMEs, and annotations from code via TypeScript AST |
 | 🏗️ **Arch Spec** | `cdd spec` | Generate architecture spec with full dependency graph |
 | 🔍 **Review** | `cdd review` | Audit codebase against CDD principles |
+| 🩺 **Doctor** | `cdd doctor` | Diagnose Node, Git, CDD config, source analysis, and generated artifacts |
+| ✅ **Verify** | `cdd verify` | Check release readiness: config, docs freshness, AI routing, and review errors |
 | 📋 **Context** | `cdd context` | Print project structure, functions, and dependencies for AI prompts |
+| 🤖 **AI Routing** | `cdd ai install` | Install CDD doc-routing rules into AI instruction files |
 | 🎨 **Design** | `cdd design` | Extract design tokens — colors, typography, spacing — from CSS/TS/Tailwind |
 | 📝 **Changelog** | `cdd changelog` | Auto-generate CHANGELOG.md from git history + code analysis |
 | 👁️ **Watch** | `cdd docgen --watch` | Auto-regenerate docs on file changes |
@@ -77,32 +80,38 @@ $ cdd
    Code-Driven Development
 
 ? 실행할 명령어를 선택하세요 (Use arrow keys)
-❯ 명령어 실행  — 생성/분석 명령어를 선택합니다
-  init         — CDD 설정 초기화
-  uninstall    — CDD 아티팩트 제거
+❯ 추천 워크플로 시작   — doctor로 상태 진단 후 다음 액션 확인
+  릴리즈 준비 확인     — config, generated docs, AI routing, review errors
+  명령어 직접 실행      — 생성/분석 명령어를 선택합니다
+  init                 — CDD 설정 초기화
+  update               — cdd 자체 업데이트
+  uninstall            — CDD 아티팩트 제거
 ```
 
-**Step 1** — `명령어 실행`을 선택하면 그룹별 다중 선택 메뉴로 이동합니다:
+**Step 1** — `명령어 직접 실행`을 선택하면 그룹별 다중 선택 메뉴로 이동합니다:
 
 ```
 ? 실행할 명령어를 선택하세요 (Space로 선택, Enter로 실행)
   ⚡ 모두 선택
+ │ 🩺 진단
+  ├ ▪ doctor     — 프로젝트 상태와 다음 액션
+  └ ▪ verify     — 릴리즈 준비 상태
  │ 📄 생성
   ├ ▪ docgen     — 코드 → 문서
+  ├ ▪ spec       — 아키텍처 스펙
   ├ ▪ design     — 디자인 토큰 추출
   └ ▪ changelog  — CHANGELOG 자동 생성
  │ 🔍 분석
-  ├ ▪ spec       — 아키텍처 스펙
   ├ ▪ review     — CDD 감사
   └ ▪ context    — AI 컨텍스트 출력
 ```
 
-- **그룹 헤더**(📄 생성 / 🔍 분석)는 선택 불가 — 순수 시각적 구분
-- **⚡ 모두 선택** — 체크하면 6개 모든 명령어를 한 번에 실행
+- **그룹 헤더**(🩺 진단 / 📄 생성 / 🔍 분석)는 선택 불가 — 순수 시각적 구분
+- **⚡ 모두 선택** — 체크하면 권장 흐름(doctor + 생성 + review + verify + context)을 한 번에 실행
 - 다중 선택 후 Enter → 선택된 명령어를 순차 실행
 - 생성 명령어(docgen/spec/design/changelog) 완료 후 파일 열기 확인 (`open`/`xdg-open`)
 
-**init / uninstall**은 바로 실행 단계로 넘어갑니다 (디렉토리 입력 → 실행).
+**doctor / verify / init / update / uninstall**은 첫 화면에서 바로 실행할 수 있습니다.
 
 Pass `--cli` to skip the TUI and use traditional command-line mode directly. Use `--help` or `-h` for CLI help.
 
@@ -132,15 +141,17 @@ cdd
 # Step 1: Initialize CDD in your project
 cdd init
 
-# Step 2: Generate all documentation, specs, and design in one go
+# Step 2: Generate all documentation, specs, design, and changelog in one go
 cdd sync
 
 # Step 3: Audit your codebase against CDD principles
 cdd review
 
-# Step 4: Generate CHANGELOG from git history
-cdd changelog
+# Step 4: Check release readiness before handing the project to humans or AI agents
+cdd verify
 ```
+
+`cdd init` also installs a small CDD context-routing block into existing AI instruction files such as `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, or `OPENCODE.md`. If none exist, it creates `AGENTS.md`. This lets Codex, Claude Code, OpenCode, and similar tools discover when to read `DESIGN.md`, `ARCHITECTURE.md`, `CHANGELOG.md`, and `docs/README.md` without users having to remember those files manually.
 
 ### Example Output
 
@@ -212,6 +223,30 @@ CDD is optimized for workflows where AI agents are first-class participants:
 - **AI reads code** → Clean structure with type signatures is the best prompt context for Codex.
 - **AI writes code** → Generated code self-documents when CDD conventions are followed.
 - **No spec drift** → Since code IS the spec, there's nothing to become outdated.
+- **AI discovers generated context** → `cdd init` and `cdd sync` keep AI instruction files wired to task-specific generated docs.
+
+### AI Context Routing
+
+Most AI coding tools read a project instruction file when they start, but humans do not always know to point them at CDD-generated docs. CDD handles that bridge automatically.
+
+On `cdd init`, CDD looks for root-level AI instruction files:
+
+- `AGENTS.md`
+- `CLAUDE.md`
+- `CODEX.md`
+- `OPENCODE.md`
+
+If one or more exist, CDD inserts or refreshes a managed block in each file. If none exist, CDD creates `AGENTS.md`. `cdd sync` refreshes the same block after regenerating docs, and `cdd ai install` can be used to reinstall it manually.
+
+The managed block tells AI tools when to read each generated artifact:
+
+- Use `docs/README.md` for project/API overview.
+- Use `ARCHITECTURE.md` before module, entry point, import, or dependency changes.
+- Use `DESIGN.md` before UI, UX, styling, layout, color, spacing, typography, or token changes.
+- Use `CHANGELOG.md` before release notes, versioning, migrations, or history-sensitive work.
+- Treat source code as final authority; if generated docs conflict with code, run `cdd sync`.
+
+CDD only manages the block between `<!-- cdd:ai-context:start -->` and `<!-- cdd:ai-context:end -->`; existing instructions stay intact.
 
 ### Comparison to Other Methodologies
 
@@ -228,7 +263,7 @@ CDD is optimized for workflows where AI agents are first-class participants:
 
 ### `cdd init [directory]`
 
-Initializes CDD configuration in your project. Creates a `.cdd/config.json` file.
+Initializes CDD configuration in your project. Creates a `.cdd/config.json` file and installs CDD context routing into existing AI instruction files (`AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `OPENCODE.md`) or creates `AGENTS.md` when none exist.
 
 | Option | Description |
 |--------|-------------|
@@ -245,6 +280,7 @@ Scans source files using the TypeScript compiler API and generates:
 |--------|-------------|
 | `-o, --output <path>` | Output directory (default: `./docs`) |
 | `-w, --watch` | Watch source files and auto-regenerate on change |
+| `--include-tests` | Include test and fixture files in generated docs |
 
 ### `cdd spec [directory]`
 
@@ -256,6 +292,7 @@ Analyzes code structure and generates an architecture specification with:
 | Option | Description |
 |--------|-------------|
 | `-o, --output <path>` | Output file (default: `./ARCHITECTURE.md`) |
+| `--include-tests` | Include test and fixture files in architecture analysis |
 
 ### `cdd review [directory]`
 
@@ -272,6 +309,8 @@ Audits a codebase against CDD principles. Checks:
 | Option | Description |
 |--------|-------------|
 | `-o, --output <path>` | Save report to file |
+| `--include-tests` | Include test and fixture files in review |
+| `--max-findings <count>` | Maximum findings shown per severity group |
 
 ### `cdd context [directory]`
 
@@ -280,6 +319,40 @@ Prints project context optimized for AI prompts — module structure, exported s
 | Option | Description |
 |--------|-------------|
 | `-f, --file <path>` | Show context for a specific file only |
+| `--include-tests` | Include test and fixture files in project context |
+
+### `cdd ai install [directory]`
+
+Installs or refreshes the CDD managed context-routing block in AI instruction files. This is useful when AI instruction files were added after `cdd init`, or when you want to repair the managed block without reinitializing CDD.
+
+The command updates existing `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, and `OPENCODE.md` files. If none exist, it creates `AGENTS.md`.
+
+### `cdd doctor [directory]`
+
+Runs a fast health check for local prerequisites and CDD setup:
+
+- Node.js version
+- Git availability and repository status
+- `.cdd/config.json`
+- Source analysis scope
+- Generated artifact freshness
+
+| Option | Description |
+|--------|-------------|
+| `--include-tests` | Include test and fixture files in project analysis |
+
+### `cdd verify [directory]`
+
+Checks whether a project is ready to hand off, release, or continue with an AI assistant. It combines environment, CDD setup, generated artifact freshness, AI context routing, and review-error checks into one status:
+
+- `ready` — config, docs, AI routing, and review errors are clear
+- `needs-sync` — generated docs are missing or older than source files
+- `needs-attention` — setup, AI routing, source analysis, or review errors need action
+
+| Option | Description |
+|--------|-------------|
+| `--include-tests` | Include test and fixture files in project analysis |
+| `--json` | Print machine-readable JSON |
 
 ### `cdd design [directory]`
 
@@ -297,15 +370,21 @@ Output includes color swatches (rendered as ASCII blocks), token categories, and
 
 ### `cdd uninstall [directory]`
 
-Removes all CDD-generated artifacts from the project — `.cdd/`, `docs/`, `ARCHITECTURE.md`, and related output files.
+Removes CDD-generated artifacts from the project — `.cdd/`, `docs/`, `ARCHITECTURE.md`, and related output files. If AI instruction files contain a CDD managed block, `cdd uninstall` asks whether to remove that block too while preserving the rest of each instruction file.
+
+| Option | Description |
+|--------|-------------|
+| `--remove-ai-context` | Remove CDD managed blocks from AI instruction files without prompting |
+| `--keep-ai-context` | Keep CDD managed blocks in AI instruction files without prompting |
 
 ### `cdd sync [directory]`
 
-Runs all generators in sequence: `docgen` → `spec` → `design` → `changelog`. Each step runs with default options. Useful for quickly regenerating all project artifacts after code changes.
+Runs all generators in sequence: `docgen` → `spec` → `design` → `changelog`. Each step runs with default options. Useful for quickly regenerating all project artifacts after code changes. Also refreshes the CDD context-routing block in AI instruction files so assistants continue to know when generated docs should be consulted.
 
 | Option | Description |
 |--------|-------------|
 | `-o, --output <path>` | Output directory for generated artifacts (applied to all steps) |
+| `--include-tests` | Include test and fixture files in generated analysis artifacts |
 
 ### `cdd changelog [directory]`
 
@@ -316,6 +395,7 @@ Parses git history using conventional commits and generates/updates CHANGELOG.md
 | `-f, --from <ref>` | Starting commit ref (default: last tag or first commit) |
 | `-t, --to <ref>` | Ending commit ref (default: HEAD) |
 | `-o, --output <path>` | Output file (default: `./CHANGELOG.md`) |
+| `--dry-run` | Preview changelog without writing to file |
 | `--dry-run` | Preview without writing to file |
 
 ---
@@ -332,7 +412,10 @@ my-project/
 ├── docs/                   # Generated documentation (cdd docgen)
 ├── .cdd/                   # CDD configuration
 │   └── config.json
+├── AGENTS.md               # AI instruction file with CDD context routing
 ├── ARCHITECTURE.md         # Generated architecture spec (cdd spec)
+├── DESIGN.md               # Generated design token guide (cdd design)
+├── CHANGELOG.md            # Generated changelog (cdd changelog)
 └── README.md               # Enhanced by cdd docgen
 ```
 
@@ -355,7 +438,7 @@ npm run format    # Prettier
 | Script | Description |
 |--------|-------------|
 | `npm run build` | Compile TypeScript → `dist/` |
-| `npm test` | Run vitest test suite (36 tests) |
+| `npm test` | Run vitest test suite (62 tests) |
 | `npm run dev` | Run directly with tsx |
 | `npm run lint` | ESLint check |
 | `npm run format` | Prettier auto-format |

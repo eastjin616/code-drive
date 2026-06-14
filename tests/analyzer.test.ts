@@ -1,9 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import { analyzeAll } from '../src/core/analyzer.js';
 
 const FIXTURE_DIR = path.join(import.meta.dirname, 'fixtures', 'sample-project');
+
+function makeProject(files: Record<string, string>): string {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cdd-analysis-'));
+  for (const [relativePath, content] of Object.entries(files)) {
+    const fullPath = path.join(dir, relativePath);
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+    fs.writeFileSync(fullPath, content, 'utf-8');
+  }
+  return dir;
+}
 
 describe('analyzeProject', () => {
   it('returns project info from package.json', () => {
@@ -12,6 +23,93 @@ describe('analyzeProject', () => {
     expect(result.project.version).toBe('0.0.0');
     expect(result.project.language).toBe('typescript');
     expect(result.project.sourceFiles.length).toBeGreaterThan(0);
+  });
+
+  it('prefers src/index.ts as the entry point when package main is absent', () => {
+    const dir = makeProject({
+      'package.json': JSON.stringify({ name: 'entrypoint-project', version: '1.0.0' }),
+      'src/domain.ts': 'export interface Product { readonly id: string; }\n',
+      'src/index.ts': 'export type { Product } from "./domain.js";\n',
+    });
+
+    const result = analyzeAll(dir);
+
+    expect(result.project.entryPoints).toEqual(['src/index.ts']);
+  });
+});
+
+describe('analysis scope', () => {
+  it('uses .cdd sourceDir as the default public surface', () => {
+    const dir = makeProject({
+      'package.json': JSON.stringify({ name: 'scoped-project', version: '1.0.0' }),
+      '.cdd/config.json': JSON.stringify({ sourceDir: 'src' }),
+      'src/public.ts': 'export function publicApi(): string { return "ok"; }\n',
+      'tests/fixture.ts': 'export function testHelper(): string { return "test"; }\n',
+    });
+
+    const result = analyzeAll(dir);
+
+    expect(result.project.sourceFiles).toEqual(['src/public.ts']);
+    expect(result.functions.map((fn) => fn.name)).toEqual(['publicApi']);
+  });
+
+  it('excludes tests and fixtures by default when no config exists', () => {
+    const dir = makeProject({
+      'package.json': JSON.stringify({ name: 'default-scope', version: '1.0.0' }),
+      'src/index.ts': 'export function publicApi(): string { return "ok"; }\n',
+      'tests/index.test.ts': 'export function testHelper(): string { return "test"; }\n',
+      'fixtures/example.ts': 'export function fixtureHelper(): string { return "fixture"; }\n',
+    });
+
+    const result = analyzeAll(dir);
+
+    expect(result.project.sourceFiles).toEqual(['src/index.ts']);
+    expect(result.functions.map((fn) => fn.name)).toEqual(['publicApi']);
+  });
+
+  it('can include tests when explicitly requested', () => {
+    const dir = makeProject({
+      'package.json': JSON.stringify({ name: 'full-scope', version: '1.0.0' }),
+      'src/index.ts': 'export function publicApi(): string { return "ok"; }\n',
+      'tests/index.test.ts': 'export function testHelper(): string { return "test"; }\n',
+    });
+
+    const result = analyzeAll(dir, { includeTests: true });
+
+    expect(result.project.sourceFiles.sort()).toEqual(['src/index.ts', 'tests/index.test.ts']);
+    expect(result.functions.map((fn) => fn.name).sort()).toEqual(['publicApi', 'testHelper']);
+  });
+
+  it('includes tests on request even when sourceDir is configured', () => {
+    const dir = makeProject({
+      'package.json': JSON.stringify({ name: 'configured-full-scope', version: '1.0.0' }),
+      '.cdd/config.json': JSON.stringify({ sourceDir: 'src' }),
+      'src/index.ts': 'export function publicApi(): string { return "ok"; }\n',
+      'tests/index.test.ts': 'export function testHelper(): string { return "test"; }\n',
+    });
+
+    const result = analyzeAll(dir, { includeTests: true });
+
+    expect(result.project.sourceFiles.sort()).toEqual(['src/index.ts', 'tests/index.test.ts']);
+    expect(result.functions.map((fn) => fn.name).sort()).toEqual(['publicApi', 'testHelper']);
+  });
+
+  it('includes tests on request even when config include narrows to src', () => {
+    const dir = makeProject({
+      'package.json': JSON.stringify({ name: 'configured-include-scope', version: '1.0.0' }),
+      '.cdd/config.json': JSON.stringify({
+        sourceDir: 'src',
+        include: ['src/**/*.{ts,tsx,js,jsx,mjs,py,go,rs,java,kt,swift}'],
+        exclude: ['tests/**', '**/*.test.*'],
+      }),
+      'src/index.ts': 'export function publicApi(): string { return "ok"; }\n',
+      'tests/index.test.ts': 'export function testHelper(): string { return "test"; }\n',
+    });
+
+    const result = analyzeAll(dir, { includeTests: true });
+
+    expect(result.project.sourceFiles.sort()).toEqual(['src/index.ts', 'tests/index.test.ts']);
+    expect(result.functions.map((fn) => fn.name).sort()).toEqual(['publicApi', 'testHelper']);
   });
 });
 
