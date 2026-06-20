@@ -8,6 +8,7 @@ import {
   generateAiContextBlock,
   installAiContext,
   removeAiContext,
+  upsertAiContextBlock,
 } from '../src/core/ai-context.js';
 
 function makeTempProject(): string {
@@ -63,6 +64,16 @@ describe('installAiContext', () => {
     const content = readFile(dir, 'CODEX.md');
     expect(content.match(new RegExp(CDD_AI_CONTEXT_START, 'g'))).toHaveLength(1);
     expect(content).not.toContain('old instructions');
+  });
+
+  it('does not add leading blank lines when refreshing a block at the top of a file', () => {
+    const content = `${generateAiContextBlock()}\n\n# Project Rules\n`;
+
+    const refreshed = upsertAiContextBlock(content);
+
+    expect(refreshed.startsWith(CDD_AI_CONTEXT_START)).toBe(true);
+    expect(refreshed).not.toMatch(/^\n/);
+    expect(refreshed).toContain('\n\n# Project Rules\n');
   });
 });
 

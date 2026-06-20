@@ -174,6 +174,26 @@ cdd prompt --file src/cli.ts
 
 Paste the output into your AI chat, then attach or paste the referenced files when the model asks for more context.
 
+Example prompt output starts like this:
+
+```text
+# Copy-Paste AI Prompt Pack
+
+Project: my-app v1.0.0
+Language: TypeScript
+Entry points: src/cli.ts
+
+## Important Context Files
+- README.md
+- docs/README.md
+- ARCHITECTURE.md
+- CHANGELOG.md
+
+## Constraints
+- Code is the source of truth.
+- Do not invent functions, commands, files, or APIs not shown in the provided context.
+```
+
 ### Developer workflow
 
 ```bash
@@ -375,6 +395,26 @@ The prompt pack includes:
 - generated CDD artifact status for `.cdd/config.json`, docs, architecture, design, and changelog outputs
 - constraints that keep the AI grounded in the codebase
 - starter questions for explanation, risk review, and implementation planning
+
+Example:
+
+```text
+# Copy-Paste AI Prompt Pack
+
+Project: my-app v1.0.0
+Language: TypeScript
+Source files: 43
+Entry points: src/cli.ts
+
+## Goal
+Goal: <describe what you want the AI to help with>
+
+## Important Context Files
+- README.md
+- docs/README.md
+- ARCHITECTURE.md
+- CHANGELOG.md
+```
 
 | Option | Description |
 |--------|-------------|

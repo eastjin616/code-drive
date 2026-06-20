@@ -174,6 +174,26 @@ cdd prompt --file src/cli.ts
 
 출력된 내용을 AI 채팅창에 붙여넣고, 모델이 더 요구하는 파일을 이어서 첨부하거나 붙여넣으면 됩니다.
 
+출력은 대략 이렇게 시작합니다:
+
+```text
+# Copy-Paste AI Prompt Pack
+
+Project: my-app v1.0.0
+Language: TypeScript
+Entry points: src/cli.ts
+
+## Important Context Files
+- README.md
+- docs/README.md
+- ARCHITECTURE.md
+- CHANGELOG.md
+
+## Constraints
+- Code is the source of truth.
+- Do not invent functions, commands, files, or APIs not shown in the provided context.
+```
+
 ### 개발자 워크플로
 
 ```bash
@@ -371,6 +391,26 @@ ChatGPT, Claude, Gemini 같은 채팅형 AI에 붙여넣을 프롬프트 팩을 
 - `.cdd/config.json`, docs, architecture, design, changelog 산출물의 생성 상태
 - AI가 코드베이스 밖 내용을 지어내지 않도록 하는 제약
 - 프로젝트 설명, 리스크 리뷰, 구현 계획을 요청하는 시작 질문
+
+예시:
+
+```text
+# Copy-Paste AI Prompt Pack
+
+Project: my-app v1.0.0
+Language: TypeScript
+Source files: 43
+Entry points: src/cli.ts
+
+## Goal
+Goal: <describe what you want the AI to help with>
+
+## Important Context Files
+- README.md
+- docs/README.md
+- ARCHITECTURE.md
+- CHANGELOG.md
+```
 
 | 옵션 | 설명 |
 |--------|-------------|

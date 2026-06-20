@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTuiStatus } from '../src/tui-status.js';
+import { buildTuiStatus, statusSummaryParts } from '../src/tui-status.js';
 import type { VerifyResult } from '../src/core/verify.js';
 
 function verifyResult(overrides: Partial<VerifyResult>): VerifyResult {
@@ -56,5 +56,14 @@ describe('buildTuiStatus', () => {
     expect(status.recommendedCommand).toBe('ai');
     expect(status.summary.fail).toBe(1);
     expect(status.nextActions).toEqual(['`cdd ai install .`을 실행해 AI 컨텍스트 라우팅을 설치하세요.']);
+  });
+
+  it('formats check summaries in Korean for the TUI', () => {
+    expect(statusSummaryParts({
+      pass: 2,
+      warn: 1,
+      fail: 0,
+      info: 1,
+    })).toEqual(['2 통과', '1 주의', '1 정보']);
   });
 });

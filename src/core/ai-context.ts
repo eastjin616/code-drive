@@ -55,7 +55,10 @@ export function upsertAiContextBlock(content: string, block = generateAiContextB
     const afterEnd = endIndex + CDD_AI_CONTEXT_END.length;
     const prefix = content.slice(0, startIndex).trimEnd();
     const suffix = content.slice(afterEnd).trimStart();
-    return suffix ? `${prefix}\n\n${block}\n\n${suffix}` : `${prefix}\n\n${block}\n`;
+    if (prefix && suffix) return `${prefix}\n\n${block}\n\n${suffix}`;
+    if (prefix) return `${prefix}\n\n${block}\n`;
+    if (suffix) return `${block}\n\n${suffix}`;
+    return `${block}\n`;
   }
 
   const trimmed = content.trimEnd();

@@ -28,6 +28,12 @@ function chooseRecommendedCommand(result: VerifyResult): RecommendedCommand
 function collectArtifactsNeedingSync(result: VerifyResult): readonly string[]
 ```
 
+### function `localizeNextAction`
+
+```typescript
+function localizeNextAction(action: string): string
+```
+
 ### export function `buildTuiStatus`
 
 ```typescript

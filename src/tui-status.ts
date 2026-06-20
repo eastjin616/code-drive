@@ -19,6 +19,12 @@ export interface TuiStatus {
 }
 
 const CHECK_STATUSES = ['pass', 'warn', 'fail', 'info'] as const satisfies readonly VerifyCheckStatus[];
+const CHECK_STATUS_LABELS = {
+  pass: '통과',
+  warn: '주의',
+  fail: '실패',
+  info: '정보',
+} as const satisfies Record<VerifyCheckStatus, string>;
 
 function countChecks(result: VerifyResult): TuiStatusSummary {
   const counts: Record<VerifyCheckStatus, number> = {
@@ -90,6 +96,6 @@ export function readTuiStatus(projectDir: string): TuiStatus {
 
 export function statusSummaryParts(summary: TuiStatusSummary): readonly string[] {
   return CHECK_STATUSES
-    .map((status) => `${summary[status]} ${status}`)
+    .map((status) => `${summary[status]} ${CHECK_STATUS_LABELS[status]}`)
     .filter((part) => !part.startsWith('0 '));
 }
