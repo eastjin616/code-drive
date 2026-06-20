@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { extractDesignTokens } from '../core/design-extractor.js';
 import { generateDesignDoc, writeDocs, mergeWithExisting } from '../core/design-generator.js';
 import { analyzeProject } from '../core/analyzer.js';
+import { isProjectDirectory } from '../core/project-detector.js';
 
 export async function designCommand(
   dir: string,
@@ -21,6 +22,11 @@ export async function designCommand(
   console.log(chalk.cyan('Scanning for design tokens...'));
 
   const project = analyzeProject(targetDir);
+  if (!isProjectDirectory(targetDir, project.sourceFiles)) {
+    console.log(chalk.yellow('No project-level sources found; skipping DESIGN.md generation.'));
+    return;
+  }
+
   const tokens = extractDesignTokens(targetDir, project.name);
 
   // Summary
@@ -29,6 +35,7 @@ export async function designCommand(
   console.log(chalk.dim(`  ${tokens.spacing.length} spacing tokens`));
   console.log(chalk.dim(`  ${tokens.borderRadius.length} border-radius tokens`));
   console.log(chalk.dim(`  ${tokens.shadows.length} shadow tokens`));
+  console.log(chalk.dim(`  ${tokens.styleUsage.length} style rule groups`));
   if (tokens.hasTailwind) console.log(chalk.dim('  Tailwind CSS config detected'));
 
   const doc = generateDesignDoc(tokens);

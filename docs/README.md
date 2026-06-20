@@ -6,7 +6,7 @@
 
 - **Version:** 0.2.0
 - **Language:** typescript
-- **Source files:** 43
+- **Source files:** 52
 - **Entry points:** src/index.ts
 
 ## Dependencies
@@ -25,9 +25,9 @@
 |------|------|------------|---------|
 | `runCLI` | `src/cli.ts:33` | argv: string[] = process.argv | void |
 | `aiInstallCommand` | `src/commands/ai.ts:6` | dir: string | Promise<void> |
-| `changelogCommand` | `src/commands/changelog.ts:16` | dir: string, options: { from?: string; to?: string; output?: string; dryRun?: boolean } | Promise<void> |
+| `changelogCommand` | `src/commands/changelog.ts:18` | dir: string, options: { from?: string; to?: string; output?: string; dryRun?: boolean } | Promise<void> |
 | `contextCommand` | `src/commands/context.ts:205` | dir: string, options: { file?: string; includeTests?: boolean } | Promise<void> |
-| `designCommand` | `src/commands/design.ts:8` | dir: string, options: { output?: string } | Promise<void> |
+| `designCommand` | `src/commands/design.ts:9` | dir: string, options: { output?: string } | Promise<void> |
 | `generateDocs` | `src/commands/docgen.ts:12` | targetDir: string, outputDir: string, options: AnalysisScopeOptions = {} | DocResult[] |
 | `docgenCommand` | `src/commands/docgen.ts:58` | dir: string, options: { output?: string; watch?: boolean; includeTests?: boolean } | Promise<void> |
 | `doctorCommand` | `src/commands/doctor.ts:38` | dir: string, options: DoctorOptions = {} | Promise<void> |
@@ -64,10 +64,11 @@
 | `getCurrentTag` | `src/core/changelog-parser.ts:126` | dir = '.' | string | null |
 | `getFirstCommitHash` | `src/core/changelog-parser.ts:138` | dir = '.' | string | null |
 | `extractCSSVariables` | `src/core/design-css-extractor.ts:4` | content: string, filePath: string | DesignTokens |
-| `extractDesignTokens` | `src/core/design-extractor.ts:140` | projectDir: string, projectName: string | DesignTokens |
+| `extractDesignTokens` | `src/core/design-extractor.ts:144` | projectDir: string, projectName: string | DesignTokens |
 | `writeDocs` | `src/core/design-generator.ts:12` | results: DocResult[] | void |
-| `generateDesignDoc` | `src/core/design-generator.ts:33` | tokens: DesignTokens | string |
-| `mergeWithExisting` | `src/core/design-generator.ts:156` | newContent: string, existingPath: string | string |
+| `generateDesignDoc` | `src/core/design-generator.ts:63` | tokens: DesignTokens | string |
+| `mergeWithExisting` | `src/core/design-generator.ts:211` | newContent: string, existingPath: string | string |
+| `extractStyleUsage` | `src/core/design-style-usage.ts:97` | content: string, filePath: string | DesignStyleUsage[] |
 | `inferColorCategory` | `src/core/design-token-utils.ts:5` | name: string | string |
 | `isColorValue` | `src/core/design-token-utils.ts:18` | value: string | boolean |
 | `isSpacingValue` | `src/core/design-token-utils.ts:23` | value: string | boolean |
@@ -76,9 +77,17 @@
 | `generateArchitectureSpec` | `src/core/generator.ts:203` | project: ProjectInfo, functions: FunctionDecl[], classes: ClassDecl[], interfaces: InterfaceDecl[], imports: ImportEdge[] | string |
 | `writeDocs` | `src/core/generator.ts:269` | results: DocResult[] | void |
 | `groupByModule` | `src/core/module-map.ts:6` | sourceFiles: readonly string[] | ModuleGroup[] |
+| `isProjectDirectory` | `src/core/project-detector.ts:42` | projectDir: string, sourceFiles: readonly string[] | boolean |
 | `collectReviewFindings` | `src/core/review-rules.ts:120` | targetDir: string, options: AnalysisScopeOptions = {} | ReviewSummary |
 | `verifyProject` | `src/core/verify.ts:149` | projectDir: string, options: VerifyOptions = {} | VerifyResult |
-| `runTUI` | `src/tui.ts:166` |  | Promise<void> |
+| `commandTitle` | `src/tui-labels.ts:52` | command: CommandId | string |
+| `runTUI` | `src/tui-runner.ts:210` |  | Promise<void> |
+| `buildTuiStatus` | `src/tui-status.ts:60` | result: VerifyResult | TuiStatus |
+| `readTuiStatus` | `src/tui-status.ts:71` | projectDir: string | TuiStatus |
+| `statusSummaryParts` | `src/tui-status.ts:75` | summary: TuiStatusSummary | readonly string[] |
+| `showBanner` | `src/tui-view.ts:12` |  | void |
+| `showDashboard` | `src/tui-view.ts:24` | status: TuiStatus | void |
+| `showDashboardError` | `src/tui-view.ts:45` | error: unknown | void |
 | `add` | `tests/fixtures/sample-project/src/index.ts:6` | a: number, b: number | number |
 | `subtract` | `tests/fixtures/sample-project/src/index.ts:11` | a: number, b: number | — |
 | `greet` | `tests/fixtures/sample-project/src/index.ts:21` | name: string | string |
@@ -118,13 +127,17 @@
 - `DesignSpacing` — name, value, source
 - `DesignBorderRadius` — name, value, source
 - `DesignShadow` — name, value, source
-- `DesignTokens` — projectName, colors, typography, spacing, borderRadius, shadows, hasTailwind
+- `DesignStyleProperty` — name, value, category
+- `DesignStyleUsage` — selector, source, properties
+- `DesignTokens` — projectName, colors, typography, spacing, borderRadius, shadows, styleUsage, hasTailwind
 - `DocResult` — filePath, content
 - `ModuleGroup` — name, files
 - `ReviewFinding` — severity, rule, message, file, line
 - `ReviewSummary` — projectName, version, functionCount, classCount, interfaceCount, findings
 - `VerifyCheck` — status, code, message, target
 - `VerifyResult` — status, projectName, checks, nextActions
+- `TuiStatusSummary` — pass, warn, fail, info
+- `TuiStatus` — projectName, status, summary, artifactsNeedingSync, nextActions, recommendedCommand
 - `User` — name, age, email
 
 ## Code Annotations

@@ -130,7 +130,7 @@ export function runCLI(argv: string[] = process.argv): void {
     .argument('[directory]', 'Project directory', '.')
     .option('-f, --from <ref>', 'Starting commit ref (default: last tag or first commit)')
     .option('-t, --to <ref>', 'Ending commit ref (default: HEAD)')
-    .option('-o, --output <path>', 'Output file for changelog', './CHANGELOG.md')
+    .option('-o, --output <path>', 'Output file for changelog (default: ./CHANGELOG.md)')
     .option('--dry-run', 'Preview changelog without writing to file')
     .action(exitOnError(async (dir: string, opts: { from?: string; to?: string; output?: string; dryRun?: boolean }) => {
       await changelogCommand(dir, opts);

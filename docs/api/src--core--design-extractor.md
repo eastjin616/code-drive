@@ -51,3 +51,9 @@ function dedupeColors(arr: DesignColor[]): DesignColor[]
 ```typescript
 function dedupeByName(arr: T[]): T[]
 ```
+
+### function `dedupeStyleUsage`
+
+```typescript
+function dedupeStyleUsage(arr: DesignTokens['styleUsage']): DesignTokens['styleUsage']
+```

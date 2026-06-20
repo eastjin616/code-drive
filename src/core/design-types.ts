@@ -30,6 +30,27 @@ export interface DesignShadow {
   readonly source: string;
 }
 
+export type DesignStyleCategory =
+  | 'color'
+  | 'typography'
+  | 'spacing'
+  | 'radius'
+  | 'shadow'
+  | 'border'
+  | 'layout';
+
+export interface DesignStyleProperty {
+  readonly name: string;
+  readonly value: string;
+  readonly category: DesignStyleCategory;
+}
+
+export interface DesignStyleUsage {
+  readonly selector: string;
+  readonly source: string;
+  properties: DesignStyleProperty[];
+}
+
 export interface DesignTokens {
   readonly projectName: string;
   colors: DesignColor[];
@@ -37,5 +58,6 @@ export interface DesignTokens {
   spacing: DesignSpacing[];
   borderRadius: DesignBorderRadius[];
   shadows: DesignShadow[];
+  styleUsage: DesignStyleUsage[];
   hasTailwind: boolean;
 }

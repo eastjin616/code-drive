@@ -41,6 +41,20 @@
 - `value`
 - `source`
 
+### export interface `DesignStyleProperty`
+
+**Members:**
+- `name`
+- `value`
+- `category`
+
+### export interface `DesignStyleUsage`
+
+**Members:**
+- `selector`
+- `source`
+- `properties`
+
 ### export interface `DesignTokens`
 
 **Members:**
@@ -50,4 +64,5 @@
 - `spacing`
 - `borderRadius`
 - `shadows`
+- `styleUsage`
 - `hasTailwind`

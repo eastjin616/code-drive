@@ -1,4 +1,4 @@
-## [HEAD] — 2026-06-14
+## [HEAD] — 2026-06-18
 
 ### Added
 
@@ -23,6 +23,16 @@
   → src/commands/context.ts (모든 chalk.dim/chalk.cyan 제거)
 - verify: 빈 interface 타입을 alias로 바꿔 lint rule과 타입 의미를 동시에 만족
   → src/core/verify.ts
+- design: 토큰이 없는 프로젝트에서 빈 목차만 있는 DESIGN.md 대신 AI 사용 지침과 토큰 추가 가이드를 생성
+  → src/core/design-generator.ts, tests/design-generator.test.ts
+- design: CSS custom property가 아니어도 일반 CSS rule의 색상, spacing, radius, shadow, typography 사용을 DESIGN.md에 기록
+  → src/core/design-style-usage.ts, src/core/design-extractor.ts, src/core/design-generator.ts, tests/design-extractor.test.ts
+- design: 디렉터리 인자를 받았을 때 기본 DESIGN.md 출력 위치를 현재 작업 디렉터리가 아닌 대상 프로젝트로 수정
+  → src/cli.ts, src/commands/design.ts
+- design/changelog: 프로젝트가 아닌 workspace/root에서 실행될 때 루트 DESIGN.md/CHANGELOG.md 생성을 건너뛰도록 수정
+  → src/core/project-detector.ts, src/commands/design.ts, src/commands/changelog.ts, tests/design-command.test.ts, tests/changelog.test.ts
+- changelog: 디렉터리 인자를 받았을 때 기본 CHANGELOG.md 출력 위치를 현재 작업 디렉터리가 아닌 대상 프로젝트로 수정
+  → src/cli.ts, src/commands/changelog.ts
 
 ### Changed
 
@@ -40,6 +50,8 @@
   → src/tui.ts
 - TUI 명령 타입을 상수 기반 union으로 좁혀 assertion 없이 실행 순서를 계산
   → src/tui.ts
+- TUI를 프로젝트 대시보드 중심 흐름으로 개편 — verify 기반 상태 요약, 추천 액션, sync/ai install 직접 실행 추가
+  → src/tui.ts, src/tui-runner.ts, src/tui-status.ts, src/tui-view.ts, src/tui-labels.ts, src/tui-messages.ts, tests/tui-status.test.ts
 
 ### Docs
 

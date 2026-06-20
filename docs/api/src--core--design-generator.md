@@ -22,6 +22,18 @@ function colorSwatch(value: string): string
 function isHexColor(v: string): boolean
 ```
 
+### function `hasDesignTokens`
+
+```typescript
+function hasDesignTokens(tokens: DesignTokens): boolean
+```
+
+### function `appendEmptyDesignGuidance`
+
+```typescript
+function appendEmptyDesignGuidance(lines: string[]): void
+```
+
 ### export function `generateDesignDoc`
 
 ```typescript

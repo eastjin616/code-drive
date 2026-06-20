@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import { globSync } from 'glob';
 import { extractCSSVariables } from './design-css-extractor.js';
+import { extractStyleUsage } from './design-style-usage.js';
 import type { DesignColor, DesignSpacing, DesignTokens, DesignTypography } from './design-types.js';
 import { inferColorCategory, isColorValue, isSpacingValue } from './design-token-utils.js';
 export type {
@@ -8,6 +9,9 @@ export type {
   DesignColor,
   DesignShadow,
   DesignSpacing,
+  DesignStyleCategory,
+  DesignStyleProperty,
+  DesignStyleUsage,
   DesignTokens,
   DesignTypography,
 } from './design-types.js';
@@ -145,6 +149,7 @@ export function extractDesignTokens(projectDir: string, projectName: string): De
     spacing: [],
     borderRadius: [],
     shadows: [],
+    styleUsage: [],
     hasTailwind: false,
   };
 
@@ -159,6 +164,7 @@ export function extractDesignTokens(projectDir: string, projectName: string): De
     const content = fs.readFileSync(cssFile, 'utf-8');
     const cssTokens = extractCSSVariables(content, cssFile);
     mergeTokens(merged, cssTokens);
+    merged.styleUsage.push(...extractStyleUsage(content, cssFile));
   }
 
   // 2. Scan Tailwind config
@@ -192,6 +198,7 @@ export function extractDesignTokens(projectDir: string, projectName: string): De
   merged.spacing = dedupeByName(merged.spacing);
   merged.borderRadius = dedupeByName(merged.borderRadius);
   merged.shadows = dedupeByName(merged.shadows);
+  merged.styleUsage = dedupeStyleUsage(merged.styleUsage);
 
   return merged;
 }
@@ -204,6 +211,7 @@ function mergeTokens(target: DesignTokens, source: DesignTokens): void {
   target.spacing.push(...source.spacing);
   target.borderRadius.push(...source.borderRadius);
   target.shadows.push(...source.shadows);
+  target.styleUsage.push(...source.styleUsage);
   if (source.hasTailwind) target.hasTailwind = true;
 }
 
@@ -213,6 +221,7 @@ function mergePartialTokens(target: DesignTokens, source: Partial<DesignTokens>)
   if (source.spacing) target.spacing.push(...source.spacing);
   if (source.borderRadius) target.borderRadius.push(...source.borderRadius);
   if (source.shadows) target.shadows.push(...source.shadows);
+  if (source.styleUsage) target.styleUsage.push(...source.styleUsage);
   if (source.hasTailwind) target.hasTailwind = true;
 }
 
@@ -231,6 +240,19 @@ function dedupeByName<T extends { name: string }>(arr: T[]): T[] {
   return arr.filter((c) => {
     if (seen.has(c.name)) return false;
     seen.add(c.name);
+    return true;
+  });
+}
+
+function dedupeStyleUsage(arr: DesignTokens['styleUsage']): DesignTokens['styleUsage'] {
+  const seen = new Set<string>();
+  return arr.filter((usage) => {
+    const propertyKey = usage.properties
+      .map((property) => `${property.name}:${property.value}:${property.category}`)
+      .join('|');
+    const key = `${usage.selector}:${usage.source}:${propertyKey}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 }

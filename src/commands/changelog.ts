@@ -12,6 +12,8 @@ import {
   generateChangelogMarkdown,
 } from '../core/changelog-generator.js';
 import type { CommitWithFiles } from '../core/changelog-generator.js';
+import { analyzeProject } from '../core/analyzer.js';
+import { isProjectDirectory } from '../core/project-detector.js';
 
 export async function changelogCommand(
   dir: string,
@@ -21,6 +23,12 @@ export async function changelogCommand(
 
   if (!fs.existsSync(targetDir)) {
     throw new Error(`Directory not found: ${targetDir}`);
+  }
+
+  const project = analyzeProject(targetDir);
+  if (!isProjectDirectory(targetDir, project.sourceFiles)) {
+    console.log(chalk.yellow('No project-level sources found; skipping CHANGELOG.md generation.'));
+    return;
   }
 
   // Check git repo

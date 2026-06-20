@@ -9,6 +9,7 @@ export function extractCSSVariables(content: string, filePath: string): DesignTo
     spacing: [],
     borderRadius: [],
     shadows: [],
+    styleUsage: [],
     hasTailwind: false,
   };
 

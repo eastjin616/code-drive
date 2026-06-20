@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { mergeWithExisting } from '../src/core/design-generator.js';
+import { generateDesignDoc, mergeWithExisting } from '../src/core/design-generator.js';
+import type { DesignTokens } from '../src/core/design-extractor.js';
 
 function tempFile(content: string): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cdd-design-doc-'));
@@ -46,5 +47,56 @@ describe('mergeWithExisting design docs', () => {
 
     expect(merged).toContain(newContent);
     expect(merged).toContain('Keep the checkout button blue.');
+  });
+});
+
+describe('generateDesignDoc', () => {
+  it('explains the absence of design tokens instead of producing an empty outline', () => {
+    const tokens: DesignTokens = {
+      projectName: 'demo',
+      colors: [],
+      typography: [],
+      spacing: [],
+      borderRadius: [],
+      shadows: [],
+      styleUsage: [],
+      hasTailwind: false,
+    };
+
+    const doc = generateDesignDoc(tokens);
+
+    expect(doc).toContain('No design tokens found');
+    expect(doc).toContain('AI Usage Guidance');
+    expect(doc).toContain('Run `cdd design` again');
+    expect(doc).not.toContain('## Table of Contents\n\n\n');
+  });
+
+  it('documents extracted style usage from existing CSS rules', () => {
+    const tokens: DesignTokens = {
+      projectName: 'demo',
+      colors: [],
+      typography: [],
+      spacing: [],
+      borderRadius: [],
+      shadows: [],
+      styleUsage: [
+        {
+          selector: '.primary-button',
+          source: '/tmp/demo/src/button.css',
+          properties: [
+            { name: 'background-color', value: '#2563eb', category: 'color' },
+            { name: 'padding', value: '12px 16px', category: 'spacing' },
+          ],
+        },
+      ],
+      hasTailwind: false,
+    };
+
+    const doc = generateDesignDoc(tokens);
+
+    expect(doc).toContain('Detected Style Usage');
+    expect(doc).toContain('`.primary-button`');
+    expect(doc).toContain('`background-color`');
+    expect(doc).toContain('`#2563eb`');
   });
 });

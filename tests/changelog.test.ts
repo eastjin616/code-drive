@@ -99,6 +99,17 @@ describe('changelogCommand', () => {
     expect(changelog).toContain('initial demo');
     expect(changelog).toContain('index.ts');
   });
+
+  it('does not create CHANGELOG.md when run from a non-project workspace root', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cdd-changelog-root-'));
+    const sourcePath = path.join(dir, 'nested-app', 'src', 'index.ts');
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, 'export const value = 1;\n', 'utf-8');
+
+    await changelogCommand(dir, {});
+
+    expect(fs.existsSync(path.join(dir, 'CHANGELOG.md'))).toBe(false);
+  });
 });
 
 // ─── formatEntryLine ──────────────────────────────────────────────────

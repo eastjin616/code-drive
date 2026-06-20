@@ -4,12 +4,12 @@
 
 ## Overview
 
-- **Source files:** 43
+- **Source files:** 52
 - **Entry points:** src/index.ts
 - **Dependencies:** 7
-- **Exported functions:** 60
+- **Exported functions:** 69
 - **Exported classes:** 1
-- **Exported interfaces:** 32
+- **Exported interfaces:** 36
 
 ## Dependency Graph
 
@@ -49,6 +49,8 @@
   generateChangelogMarkdown,
 } |
 | `src/commands/changelog.ts` | `../core/changelog-generator.js` | type { CommitWithFiles } |
+| `src/commands/changelog.ts` | `../core/analyzer.js` | { analyzeProject } |
+| `src/commands/changelog.ts` | `../core/project-detector.js` | { isProjectDirectory } |
 | `src/commands/context.ts` | `node:fs` | * as fs |
 | `src/commands/context.ts` | `node:path` | * as path |
 | `src/commands/context.ts` | `../core/analyzer.js` | { analyzeAll, analyzeProject, analyzeSourceFiles } |
@@ -60,9 +62,7 @@
 | `src/commands/design.ts` | `../core/design-extractor.js` | { extractDesignTokens } |
 | `src/commands/design.ts` | `../core/design-generator.js` | { generateDesignDoc, writeDocs, mergeWithExisting } |
 | `src/commands/design.ts` | `../core/analyzer.js` | { analyzeProject } |
-| `src/commands/docgen.ts` | `node:fs` | * as fs |
-| `src/commands/docgen.ts` | `node:path` | * as path |
-| _… and 161 more imports_ | | |
+| _… and 192 more imports_ | | |
 
 ## Module Map
 
@@ -93,13 +93,20 @@
 - `src/core/design-css-extractor.ts`
 - `src/core/design-extractor.ts`
 - `src/core/design-generator.ts`
+- `src/core/design-style-usage.ts`
 - `src/core/design-token-utils.ts`
 - `src/core/design-types.ts`
 - `src/core/generator.ts`
 - `src/core/module-map.ts`
+- `src/core/project-detector.ts`
 - `src/core/review-rules.ts`
 - `src/core/verify.ts`
 - `src/index.ts`
+- `src/tui-labels.ts`
+- `src/tui-messages.ts`
+- `src/tui-runner.ts`
+- `src/tui-status.ts`
+- `src/tui-view.ts`
 - `src/tui.ts`
 
 ### `tests/`
@@ -108,11 +115,13 @@
 - `tests/analyzer.test.ts`
 - `tests/artifact-freshness.test.ts`
 - `tests/changelog.test.ts`
+- `tests/design-command.test.ts`
 - `tests/design-extractor.test.ts`
 - `tests/design-generator.test.ts`
 - `tests/fixtures/sample-project/src/index.ts`
 - `tests/fixtures/sample-project/src/utils.ts`
 - `tests/generator.test.ts`
+- `tests/tui-status.test.ts`
 - `tests/verify.test.ts`
 
 ---

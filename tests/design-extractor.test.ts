@@ -34,4 +34,34 @@ describe('extractDesignTokens', () => {
       sizes: [{ name: 'body', value: '16px' }],
     });
   });
+
+  it('extracts design usage from ordinary CSS rules when tokens are absent', () => {
+    const dir = makeProject({
+      'src/button.css': [
+        '.primary-button {',
+        '  color: #ffffff;',
+        '  background-color: #2563eb;',
+        '  padding: 12px 16px;',
+        '  border-radius: 8px;',
+        '  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);',
+        '}',
+      ].join('\n'),
+    });
+
+    const tokens = extractDesignTokens(dir, 'demo');
+
+    expect(tokens.styleUsage).toEqual([
+      {
+        selector: '.primary-button',
+        source: path.join(dir, 'src/button.css'),
+        properties: [
+          { name: 'color', value: '#ffffff', category: 'color' },
+          { name: 'background-color', value: '#2563eb', category: 'color' },
+          { name: 'padding', value: '12px 16px', category: 'spacing' },
+          { name: 'border-radius', value: '8px', category: 'radius' },
+          { name: 'box-shadow', value: '0 8px 24px rgb(0 0 0 / 12%)', category: 'shadow' },
+        ],
+      },
+    ]);
+  });
 });
