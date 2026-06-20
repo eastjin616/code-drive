@@ -22,10 +22,28 @@ function getJSDoc(node: ts.Node, _sourceFile: ts.SourceFile): string
 function getNodeText(node: ts.Node | undefined): string
 ```
 
+### function `isRecord`
+
+```typescript
+function isRecord(value: unknown): value is Record<string, unknown>
+```
+
+### function `candidateSourcePaths`
+
+```typescript
+function candidateSourcePaths(raw: string): string[]
+```
+
+### function `packageEntryCandidates`
+
+```typescript
+function packageEntryCandidates(pkg: Record<string, unknown>): string[]
+```
+
 ### function `chooseEntryPoints`
 
 ```typescript
-function chooseEntryPoints(sourceFiles: readonly string[], packageMain?: unknown): string[]
+function chooseEntryPoints(sourceFiles: readonly string[], pkg: Record<string, unknown>): string[]
 ```
 
 ### function `parseSourceFile`

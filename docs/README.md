@@ -6,8 +6,8 @@
 
 - **Version:** 0.2.0
 - **Language:** typescript
-- **Source files:** 52
-- **Entry points:** src/index.ts
+- **Source files:** 43
+- **Entry points:** src/cli.ts
 
 ## Dependencies
 
@@ -23,15 +23,16 @@
 
 | Name | File | Parameters | Returns |
 |------|------|------------|---------|
-| `runCLI` | `src/cli.ts:33` | argv: string[] = process.argv | void |
+| `runCLI` | `src/cli.ts:34` | argv: string[] = process.argv | void |
 | `aiInstallCommand` | `src/commands/ai.ts:6` | dir: string | Promise<void> |
 | `changelogCommand` | `src/commands/changelog.ts:18` | dir: string, options: { from?: string; to?: string; output?: string; dryRun?: boolean } | Promise<void> |
 | `contextCommand` | `src/commands/context.ts:205` | dir: string, options: { file?: string; includeTests?: boolean } | Promise<void> |
 | `designCommand` | `src/commands/design.ts:9` | dir: string, options: { output?: string } | Promise<void> |
 | `generateDocs` | `src/commands/docgen.ts:12` | targetDir: string, outputDir: string, options: AnalysisScopeOptions = {} | DocResult[] |
 | `docgenCommand` | `src/commands/docgen.ts:58` | dir: string, options: { output?: string; watch?: boolean; includeTests?: boolean } | Promise<void> |
-| `doctorCommand` | `src/commands/doctor.ts:38` | dir: string, options: DoctorOptions = {} | Promise<void> |
+| `doctorCommand` | `src/commands/doctor.ts:39` | dir: string, options: DoctorOptions = {} | Promise<void> |
 | `initCommand` | `src/commands/init.ts:8` | dir: string, options: { force?: boolean } | Promise<void> |
+| `promptCommand` | `src/commands/prompt.ts:9` | dir: string, options: PromptCommandOptions = {} | Promise<void> |
 | `reviewCommand` | `src/commands/review.ts:44` | dir: string, options: ReviewOptions | Promise<void> |
 | `specCommand` | `src/commands/spec.ts:8` | dir: string, options: { output?: string; full?: boolean; includeTests?: boolean } | Promise<void> |
 | `syncCommand` | `src/commands/sync.ts:10` | dir: string, options: { output?: string; includeTests?: boolean } = {} | Promise<void> |
@@ -41,15 +42,15 @@
 | `findAiContextFiles` | `src/core/ai-context.ts:22` | projectDir: string | readonly string[] |
 | `generateAiContextBlock` | `src/core/ai-context.ts:33` |  | string |
 | `upsertAiContextBlock` | `src/core/ai-context.ts:50` | content: string, block = generateAiContextBlock() | string |
-| `removeAiContextBlock` | `src/core/ai-context.ts:65` | content: string | string |
-| `installAiContext` | `src/core/ai-context.ts:80` | projectDir: string | AiContextInstallResult |
-| `removeAiContext` | `src/core/ai-context.ts:114` | projectDir: string | AiContextRemoveResult |
+| `removeAiContextBlock` | `src/core/ai-context.ts:68` | content: string | string |
+| `installAiContext` | `src/core/ai-context.ts:83` | projectDir: string | AiContextInstallResult |
+| `removeAiContext` | `src/core/ai-context.ts:117` | projectDir: string | AiContextRemoveResult |
 | `readCddConfig` | `src/core/analysis-scope.ts:77` | projectDir: string | CddConfig |
 | `getSourceFiles` | `src/core/analysis-scope.ts:98` | projectDir: string, extensions: string, options: AnalysisScopeOptions = {} | string[] |
-| `analyzeProject` | `src/core/analyzer.ts:193` | dir: string, options: AnalysisScopeOptions = {} | ProjectInfo |
-| `analyzeSourceFiles` | `src/core/analyzer.ts:212` | dir: string, options: AnalysisScopeOptions = {} | { functions: FunctionDecl[]; classes: ClassDecl[]; interfaces: InterfaceDecl[]; imports: ImportEdge[]; } |
-| `extractAnnotations` | `src/core/analyzer.ts:246` | dir: string, options: AnalysisScopeOptions = {} | CodeAnnotation[] |
-| `analyzeAll` | `src/core/analyzer.ts:277` | dir: string, options: AnalysisScopeOptions = {} | AnalysisResult |
+| `analyzeProject` | `src/core/analyzer.ts:237` | dir: string, options: AnalysisScopeOptions = {} | ProjectInfo |
+| `analyzeSourceFiles` | `src/core/analyzer.ts:256` | dir: string, options: AnalysisScopeOptions = {} | { functions: FunctionDecl[]; classes: ClassDecl[]; interfaces: InterfaceDecl[]; imports: ImportEdge[]; } |
+| `extractAnnotations` | `src/core/analyzer.ts:290` | dir: string, options: AnalysisScopeOptions = {} | CodeAnnotation[] |
+| `analyzeAll` | `src/core/analyzer.ts:321` | dir: string, options: AnalysisScopeOptions = {} | AnalysisResult |
 | `assessArtifactFreshness` | `src/core/artifact-freshness.ts:34` | projectDir: string, artifacts: readonly ArtifactTarget[], sourceFiles: readonly string[] | ArtifactFreshness[] |
 | `generateCddConfig` | `src/core/cdd-config-generator.ts:1` | dir: string | Record<string, unknown> |
 | `formatEntryLine` | `src/core/changelog-generator.ts:50` | entry: ChangelogEntry | string |
@@ -78,31 +79,22 @@
 | `writeDocs` | `src/core/generator.ts:269` | results: DocResult[] | void |
 | `groupByModule` | `src/core/module-map.ts:6` | sourceFiles: readonly string[] | ModuleGroup[] |
 | `isProjectDirectory` | `src/core/project-detector.ts:42` | projectDir: string, sourceFiles: readonly string[] | boolean |
+| `generatePromptPack` | `src/core/prompt-pack.ts:112` | projectDir: string, options: PromptPackOptions = {} | string |
 | `collectReviewFindings` | `src/core/review-rules.ts:120` | targetDir: string, options: AnalysisScopeOptions = {} | ReviewSummary |
+| `findCddShellAliasIssues` | `src/core/shell-alias.ts:47` | options: ShellAliasOptions | ShellAliasIssue[] |
 | `verifyProject` | `src/core/verify.ts:149` | projectDir: string, options: VerifyOptions = {} | VerifyResult |
-| `commandTitle` | `src/tui-labels.ts:52` | command: CommandId | string |
-| `runTUI` | `src/tui-runner.ts:210` |  | Promise<void> |
-| `buildTuiStatus` | `src/tui-status.ts:60` | result: VerifyResult | TuiStatus |
-| `readTuiStatus` | `src/tui-status.ts:71` | projectDir: string | TuiStatus |
-| `statusSummaryParts` | `src/tui-status.ts:75` | summary: TuiStatusSummary | readonly string[] |
+| `commandTitle` | `src/tui-labels.ts:72` | command: CommandId | string |
+| `runTUI` | `src/tui-runner.ts:214` |  | Promise<void> |
+| `buildTuiStatus` | `src/tui-status.ts:82` | result: VerifyResult | TuiStatus |
+| `readTuiStatus` | `src/tui-status.ts:93` | projectDir: string | TuiStatus |
+| `statusSummaryParts` | `src/tui-status.ts:97` | summary: TuiStatusSummary | readonly string[] |
 | `showBanner` | `src/tui-view.ts:12` |  | void |
 | `showDashboard` | `src/tui-view.ts:24` | status: TuiStatus | void |
 | `showDashboardError` | `src/tui-view.ts:45` | error: unknown | void |
-| `add` | `tests/fixtures/sample-project/src/index.ts:6` | a: number, b: number | number |
-| `subtract` | `tests/fixtures/sample-project/src/index.ts:11` | a: number, b: number | — |
-| `greet` | `tests/fixtures/sample-project/src/index.ts:21` | name: string | string |
-| `fetchData` | `tests/fixtures/sample-project/src/utils.ts:24` | url: string | Promise<unknown> |
-
-## Public API — Classes
-
-### `Calculator`
-
-- **File:** `tests/fixtures/sample-project/src/utils.ts:4`
-- **Methods:** multiply
-- **Properties:** factor
 
 ## Public API — Interfaces
 
+- `PromptCommandOptions` — file, includeTests
 - `VerifyCommandOptions` — includeTests, json
 - `AiContextInstallResult` — targetFiles, createdFiles, updatedFiles
 - `AiContextRemoveResult` — targetFiles, updatedFiles, unchangedFiles
@@ -132,21 +124,16 @@
 - `DesignTokens` — projectName, colors, typography, spacing, borderRadius, shadows, styleUsage, hasTailwind
 - `DocResult` — filePath, content
 - `ModuleGroup` — name, files
+- `PromptPackOptions` — file
 - `ReviewFinding` — severity, rule, message, file, line
 - `ReviewSummary` — projectName, version, functionCount, classCount, interfaceCount, findings
+- `ShellAliasFile` — path, content
+- `ShellAliasIssue` — file, line, target
+- `ShellAliasOptions` — projectDir, homeDir, files
 - `VerifyCheck` — status, code, message, target
 - `VerifyResult` — status, projectName, checks, nextActions
 - `TuiStatusSummary` — pass, warn, fail, info
 - `TuiStatus` — projectName, status, summary, artifactsNeedingSync, nextActions, recommendedCommand
-- `User` — name, age, email
-
-## Code Annotations
-
-| File | Line | Tag | Note |
-|------|------|-----|------|
-| `tests/fixtures/sample-project/src/index.ts` | 15 | `todo` | add multiplication function |
-| `tests/fixtures/sample-project/src/index.ts` | 16 | `fixme` | handle negative numbers in subtract |
-| `tests/fixtures/sample-project/src/utils.ts` | 23 | `hack` | fetchData uses mock endpoint for now |
 
 ---
 *Generated by [code-drive](https://github.com/eastjin616/code-drive)*
