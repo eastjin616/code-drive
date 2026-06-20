@@ -7,6 +7,7 @@ import type { AnalysisScopeOptions } from '../core/analysis-scope.js';
 import { readCddConfig } from '../core/analysis-scope.js';
 import { assessArtifactFreshness } from '../core/artifact-freshness.js';
 import { isGitRepo } from '../core/changelog-parser.js';
+import { findCddShellAliasIssues } from '../core/shell-alias.js';
 
 interface Check {
   readonly label: string;
@@ -66,6 +67,12 @@ export async function doctorCommand(dir: string, options: DoctorOptions = {}): P
     checks.push(fail('Git not found — install git'));
   }
 
+  const aliasIssues = findCddShellAliasIssues({ projectDir: targetDir });
+  for (const issue of aliasIssues) {
+    checks.push(warn(`Shell alias for cdd points outside this project: ${issue.file}:${issue.line} → ${issue.target}`));
+    addRecommendation(recommendations, 'Remove or refresh the stale `cdd` shell alias so the npm-linked command can run.');
+  }
+
   // ── Project checks ────────────────────────────────────────────────
 
   // CDD config
@@ -91,8 +98,8 @@ export async function doctorCommand(dir: string, options: DoctorOptions = {}): P
   // Git repo status
   if (isGitRepo(targetDir)) {
     try {
-      const branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: targetDir, encoding: 'utf-8' }).trim();
-      const status = execSync('git status --porcelain', { cwd: targetDir, encoding: 'utf-8' }).trim();
+      const branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: targetDir, encoding: 'utf-8', stdio: 'pipe' }).trim();
+      const status = execSync('git status --porcelain', { cwd: targetDir, encoding: 'utf-8', stdio: 'pipe' }).trim();
       checks.push(ok(`Git repository (${branch})${status ? ' — uncommitted changes' : ''}`));
       if (status) {
         const changed = status.split('\n').length;
