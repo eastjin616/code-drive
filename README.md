@@ -17,11 +17,13 @@
 
 ---
 
-## Why This Project Matters
+## Why This Exists
 
-In the age of AI-assisted software development, code is being generated faster than ever. Yet most existing methodologies still treat code as a *byproduct* — generated from specs, documents, or configuration files. This creates a fundamental problem: **specs drift from implementation.**
+AI can write code quickly, but it still struggles when the project context is scattered across source files, generated docs, changelogs, and AI instruction files. Agent runtimes can sometimes read `AGENTS.md`, `CODEX.md`, `CLAUDE.md`, or `CHANGELOG.md` automatically. Prompt-only users cannot rely on that. They have to decide what to paste, how much context to include, and how to keep the AI grounded.
 
-**Code-Driven Development (CDD)** solves this by inverting the relationship:
+**Code-Driven Development (CDD)** exists to turn the codebase itself into the source for docs, architecture, changelog context, and copy-paste prompts. Instead of asking humans to maintain separate specs, CDD derives the working context from the implementation.
+
+CDD solves this by inverting the relationship:
 
 | Traditional (Spec-Driven) | Code-Driven (CDD) |
 |--------------------------|-------------------|
@@ -32,12 +34,14 @@ In the age of AI-assisted software development, code is being generated faster t
 
 CDD is a **developer tool** and **methodology** that:
 1. **Eliminates documentation drift** — Docs are generated from AST analysis of actual source code
-2. **Enables AI-native workflows** — Clean code structure is the interface for AI agents (Codex, Claude Code, Copilot)
-3. **Reduces maintenance burden** — One change in code = docs and specs update automatically
-4. **Catches issues early** — Built-in `cdd review` audits naming, documentation coverage, circular dependencies, and module size
+2. **Helps prompt-only AI users** — `cdd prompt` creates a copy-paste brief for ChatGPT, Claude, Gemini, and similar tools
+3. **Enables AI-native workflows** — `cdd ai install` wires generated docs into agent instruction files
+4. **Reduces maintenance burden** — One change in code = docs, specs, and prompt context can be refreshed
+5. **Catches issues early** — Built-in `cdd review` audits naming, documentation coverage, circular dependencies, and module size
 
 ### Who It Serves
 
+- **Prompt-only AI users** pasting project context into ChatGPT, Claude, Gemini, or similar chat tools
 - **Individual developers** maintaining personal projects who want automated docs
 - **Small OSS teams** who need architecture documentation without overhead
 - **AI-assisted development teams** where code quality directly impacts AI agent effectiveness
@@ -54,6 +58,7 @@ CDD is a **developer tool** and **methodology** that:
 | 🔍 **Review** | `cdd review` | Audit codebase against CDD principles |
 | 🩺 **Doctor** | `cdd doctor` | Diagnose Node, Git, CDD config, source analysis, and generated artifacts |
 | ✅ **Verify** | `cdd verify` | Check release readiness: config, docs freshness, AI routing, and review errors |
+| ✍️ **Prompt Pack** | `cdd prompt` | Print a copy-paste AI prompt brief for ChatGPT, Claude, Gemini, and other chat tools |
 | 📋 **Context** | `cdd context` | Print project structure, functions, and dependencies for AI prompts |
 | 🤖 **AI Routing** | `cdd ai install` | Install CDD doc-routing rules into AI instruction files |
 | 🎨 **Design** | `cdd design` | Extract design tokens — colors, typography, spacing — from CSS/TS/Tailwind |
@@ -66,7 +71,7 @@ CDD is a **developer tool** and **methodology** that:
 
 ## TUI — Interactive Mode (Default)
 
-Running `cdd` without any subcommand launches an interactive TUI with a two-step menu:
+Running `cdd` without any subcommand launches an interactive TUI with a project dashboard first:
 
 ```
 $ cdd
@@ -80,38 +85,57 @@ $ cdd
    Code-Driven Development
 
 ? 실행할 명령어를 선택하세요 (Use arrow keys)
-❯ 추천 워크플로 시작   — doctor로 상태 진단 후 다음 액션 확인
-  릴리즈 준비 확인     — config, generated docs, AI routing, review errors
-  명령어 직접 실행      — 생성/분석 명령어를 선택합니다
+Project dashboard
+  Project      code-drive
+  Status       ready
+  Checks       11 pass
+  Recommended  verify — 릴리즈 준비 상태 확인
+
+? 실행할 내용을 선택하세요 (Use arrow keys)
+❯ 추천 액션 실행        — project status에 맞는 다음 명령
+  verify               — 릴리즈 준비 상태 확인
+  명령어 직접 실행       — sync, design, changelog, ai install 등 선택
   init                 — CDD 설정 초기화
+  ai install           — AI 시작 문서 라우팅 설치
   update               — cdd 자체 업데이트
   uninstall            — CDD 아티팩트 제거
 ```
 
-**Step 1** — `명령어 직접 실행`을 선택하면 그룹별 다중 선택 메뉴로 이동합니다:
+`추천 액션 실행` automatically selects the most useful next step:
+
+- `sync` when generated artifacts are missing or stale
+- `ai install` when AI context routing is missing
+- `verify` when the project is ready
+- `doctor` when setup needs attention
+
+`명령어 직접 실행` opens the grouped multi-select command menu:
 
 ```
 ? 실행할 명령어를 선택하세요 (Space로 선택, Enter로 실행)
-  ⚡ 모두 선택
- │ 🩺 진단
-  ├ ▪ doctor     — 프로젝트 상태와 다음 액션
-  └ ▪ verify     — 릴리즈 준비 상태
- │ 📄 생성
-  ├ ▪ docgen     — 코드 → 문서
-  ├ ▪ spec       — 아키텍처 스펙
-  ├ ▪ design     — 디자인 토큰 추출
-  └ ▪ changelog  — CHANGELOG 자동 생성
- │ 🔍 분석
-  ├ ▪ review     — CDD 감사
-  └ ▪ context    — AI 컨텍스트 출력
+  권장 흐름
+  └ ▪ 권장 전체 흐름 — doctor + sync + review + verify + context
+  진단
+  ├ ▪ doctor
+  └ ▪ verify
+  생성
+  ├ ▪ sync
+  ├ ▪ docgen
+  ├ ▪ spec
+  ├ ▪ design
+  └ ▪ changelog
+  AI
+  ├ ▪ ai install
+  ├ ▪ prompt
+  └ ▪ context
+  관리
+  ├ ▪ review
+  └ ▪ uninstall
 ```
 
-- **그룹 헤더**(🩺 진단 / 📄 생성 / 🔍 분석)는 선택 불가 — 순수 시각적 구분
-- **⚡ 모두 선택** — 체크하면 권장 흐름(doctor + 생성 + review + verify + context)을 한 번에 실행
-- 다중 선택 후 Enter → 선택된 명령어를 순차 실행
+- The dashboard is derived from the same readiness checks as `cdd verify`
+- The recommended flow now uses `sync`, so generated docs and AI routing stay aligned
+- Multi-select runs selected commands in a stable order
 - 생성 명령어(docgen/spec/design/changelog) 완료 후 파일 열기 확인 (`open`/`xdg-open`)
-
-**doctor / verify / init / update / uninstall**은 첫 화면에서 바로 실행할 수 있습니다.
 
 Pass `--cli` to skip the TUI and use traditional command-line mode directly. Use `--help` or `-h` for CLI help.
 
@@ -132,6 +156,25 @@ npx @eastjin616/code-drive <command>
 ---
 
 ## Quick Start
+
+### Prompt-only AI workflow
+
+Use this when your AI tool cannot automatically read repo files like `AGENTS.md`, `CODEX.md`, `CLAUDE.md`, `ARCHITECTURE.md`, or `CHANGELOG.md`.
+
+```bash
+# Generate or refresh project docs from code
+cdd sync
+
+# Print a copy-paste prompt pack for ChatGPT, Claude, Gemini, etc.
+cdd prompt
+
+# Focus the prompt on one file when your question is local
+cdd prompt --file src/cli.ts
+```
+
+Paste the output into your AI chat, then attach or paste the referenced files when the model asks for more context.
+
+### Developer workflow
 
 ```bash
 # Just run `cdd` — the TUI menu guides you through all commands
@@ -321,6 +364,23 @@ Prints project context optimized for AI prompts — module structure, exported s
 | `-f, --file <path>` | Show context for a specific file only |
 | `--include-tests` | Include test and fixture files in project context |
 
+### `cdd prompt [directory]`
+
+Prints a copy-paste AI prompt pack for users working in ChatGPT, Claude, Gemini, or another chat UI that cannot automatically read repository files.
+
+The prompt pack includes:
+
+- project name, version, language, entry points, dependencies, and source count
+- important context files to paste or attach, such as `README.md`, `ARCHITECTURE.md`, `CHANGELOG.md`, and `docs/README.md`
+- generated CDD artifact status for `.cdd/config.json`, docs, architecture, design, and changelog outputs
+- constraints that keep the AI grounded in the codebase
+- starter questions for explanation, risk review, and implementation planning
+
+| Option | Description |
+|--------|-------------|
+| `-f, --file <path>` | Focus the prompt on a specific file |
+| `--include-tests` | Include test and fixture files in prompt analysis |
+
 ### `cdd ai install [directory]`
 
 Installs or refreshes the CDD managed context-routing block in AI instruction files. This is useful when AI instruction files were added after `cdd init`, or when you want to repair the managed block without reinitializing CDD.
@@ -359,10 +419,12 @@ Checks whether a project is ready to hand off, release, or continue with an AI a
 Scans source code for design tokens across multiple sources and generates a consolidated `DESIGN.md`:
 
 - **CSS**: `--color-*`, `--font-*`, `--space-*`, `--radius-*`, `--shadow-*` custom properties
+- **CSS rules**: concrete usage such as `background-color`, `padding`, `border-radius`, and `box-shadow`
 - **TypeScript**: Named `const` color/spacing objects (e.g. `const colors = {}`)
 - **Tailwind**: `tailwind.config.*` theme extensions
 
 Output includes color swatches (rendered as ASCII blocks), token categories, and source file references.
+If the target directory looks like a workspace/root folder rather than a project, CDD skips root-level `DESIGN.md` generation.
 
 | Option | Description |
 |--------|-------------|
@@ -379,7 +441,7 @@ Removes CDD-generated artifacts from the project — `.cdd/`, `docs/`, `ARCHITEC
 
 ### `cdd sync [directory]`
 
-Runs all generators in sequence: `docgen` → `spec` → `design` → `changelog`. Each step runs with default options. Useful for quickly regenerating all project artifacts after code changes. Also refreshes the CDD context-routing block in AI instruction files so assistants continue to know when generated docs should be consulted.
+Runs all generators in sequence: `docgen` → `spec` → `design` → `changelog`. Each step runs with default options. Useful for quickly regenerating all project artifacts after code changes. Also refreshes the CDD context-routing block in AI instruction files so assistants continue to know when generated docs should be consulted. `design` and `changelog` skip generation when the target directory is a non-project workspace/root folder.
 
 | Option | Description |
 |--------|-------------|
@@ -388,7 +450,7 @@ Runs all generators in sequence: `docgen` → `spec` → `design` → `changelog
 
 ### `cdd changelog [directory]`
 
-Parses git history using conventional commits and generates/updates CHANGELOG.md. Groups changes by type (Added, Fixed, Changed, Docs, etc.) and includes changed file paths. Uses existing tags to determine version ranges automatically.
+Parses git history using conventional commits and generates/updates CHANGELOG.md. Groups changes by type (Added, Fixed, Changed, Docs, etc.) and includes changed file paths. Uses existing tags to determine version ranges automatically. If the target directory is not a project-level directory, CDD skips root-level `CHANGELOG.md` generation.
 
 | Option | Description |
 |--------|-------------|

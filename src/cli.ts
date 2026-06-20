@@ -15,6 +15,7 @@ import { updateCommand } from './commands/update.js';
 import { doctorCommand } from './commands/doctor.js';
 import { aiInstallCommand } from './commands/ai.js';
 import { verifyCommand } from './commands/verify.js';
+import { promptCommand } from './commands/prompt.js';
 import { runTUI } from './tui.js';
 
 const pkg = { version: '0.2.0', name: 'code-drive' };
@@ -32,7 +33,7 @@ function exitOnError<TArgs extends unknown[]>(fn: (...args: TArgs) => Promise<vo
 
 export function runCLI(argv: string[] = process.argv): void {
   const cliFlags = ['--cli', '--help', '-h', '-V', '--version'];
-  const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'context', 'design', 'changelog', 'sync', 'update', 'doctor', 'verify', 'ai', 'help'];
+  const subcommands = ['init', 'docgen', 'spec', 'review', 'uninstall', 'context', 'prompt', 'design', 'changelog', 'sync', 'update', 'doctor', 'verify', 'ai', 'help'];
   const isCliMode = cliFlags.some((f) => argv.includes(f));
   const hasSubcommand = argv.slice(2).some((a) => subcommands.includes(a));
 
@@ -116,10 +117,20 @@ export function runCLI(argv: string[] = process.argv): void {
     }));
 
   program
+    .command('prompt')
+    .description('Print a copy-paste AI prompt pack for ChatGPT, Claude, Gemini, and other chat tools')
+    .argument('[directory]', 'Project directory', '.')
+    .option('-f, --file <path>', 'Focus the prompt on a specific file')
+    .option('--include-tests', 'Include test and fixture files in prompt analysis')
+    .action(exitOnError(async (dir: string, opts: { file?: string; includeTests?: boolean }) => {
+      await promptCommand(dir, opts);
+    }));
+
+  program
     .command('design')
     .description('Extract design tokens from code — colors, typography, spacing, and more')
     .argument('[directory]', 'Project directory', '.')
-    .option('-o, --output <path>', 'Output file for design spec', './DESIGN.md')
+    .option('-o, --output <path>', 'Output file for design spec (default: ./DESIGN.md)')
     .action(exitOnError(async (dir: string, opts: { output?: string }) => {
       await designCommand(dir, opts);
     }));

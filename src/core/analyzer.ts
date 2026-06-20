@@ -61,8 +61,52 @@ function getNodeText(node: ts.Node | undefined): string {
   return node.getText().replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-function chooseEntryPoints(sourceFiles: readonly string[], packageMain?: unknown): string[] {
-  if (typeof packageMain === 'string' && packageMain.trim()) return [packageMain];
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function candidateSourcePaths(raw: string): string[] {
+  const normalized = raw.replace(/\\/g, '/').replace(/^\.\/+/, '');
+  const candidates = new Set<string>([normalized]);
+
+  if (normalized.startsWith('dist/')) {
+    candidates.add(normalized.replace(/^dist\//, 'src/'));
+  }
+
+  for (const candidate of [...candidates]) {
+    if (candidate.endsWith('.js')) candidates.add(candidate.slice(0, -3) + '.ts');
+    if (candidate.endsWith('.mjs')) candidates.add(candidate.slice(0, -4) + '.ts');
+    if (candidate.endsWith('.jsx')) candidates.add(candidate.slice(0, -4) + '.tsx');
+  }
+
+  return [...candidates];
+}
+
+function packageEntryCandidates(pkg: Record<string, unknown>): string[] {
+  const candidates: string[] = [];
+  const bin = pkg.bin;
+  if (typeof bin === 'string') {
+    candidates.push(bin);
+  } else if (isRecord(bin)) {
+    for (const value of Object.values(bin)) {
+      if (typeof value === 'string') candidates.push(value);
+    }
+  }
+
+  const exportsField = pkg.exports;
+  if (typeof exportsField === 'string') {
+    candidates.push(exportsField);
+  }
+
+  if (typeof pkg.main === 'string') candidates.push(pkg.main);
+  return candidates;
+}
+
+function chooseEntryPoints(sourceFiles: readonly string[], pkg: Record<string, unknown>): string[] {
+  for (const candidate of packageEntryCandidates(pkg)) {
+    const found = candidateSourcePaths(candidate).find((entryPoint) => sourceFiles.includes(entryPoint));
+    if (found) return [found];
+  }
 
   const preferred = ['src/index.ts', 'src/index.tsx', 'index.ts', 'index.tsx'];
   const found = preferred.find((entryPoint) => sourceFiles.includes(entryPoint));
@@ -204,7 +248,7 @@ export function analyzeProject(dir: string, options: AnalysisScopeOptions = {}):
     version: pkg.version || '0.0.0',
     language: detectedLang,
     sourceFiles,
-    entryPoints: chooseEntryPoints(sourceFiles, pkg.main),
+    entryPoints: chooseEntryPoints(sourceFiles, pkg),
     dependencies: Object.keys(pkg.dependencies || {}),
   };
 }
