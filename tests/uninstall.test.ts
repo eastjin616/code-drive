@@ -30,10 +30,23 @@ function makeInstalledProject(): string {
 }
 
 describe('uninstallCommand', () => {
-  it('removes every stable generated artifact and can keep AI routing', async () => {
+  it('keeps root generated docs when requested and can keep AI routing', async () => {
     const dir = makeInstalledProject();
 
-    await uninstallCommand(dir, { removeAiContext: false });
+    await uninstallCommand(dir, { removeAiContext: false, removeRootDocs: false });
+
+    expect(fs.existsSync(path.join(dir, '.cdd'))).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'docs'))).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'ARCHITECTURE.md'))).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'DESIGN.md'))).toBe(true);
+    expect(fs.existsSync(path.join(dir, 'CHANGELOG.md'))).toBe(true);
+    expect(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf-8')).toContain('cdd:ai-context:start');
+  });
+
+  it('removes root generated docs when requested', async () => {
+    const dir = makeInstalledProject();
+
+    await uninstallCommand(dir, { removeAiContext: false, removeRootDocs: true });
 
     expect(fs.existsSync(path.join(dir, '.cdd'))).toBe(false);
     expect(fs.existsSync(path.join(dir, 'docs'))).toBe(false);

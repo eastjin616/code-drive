@@ -16,6 +16,12 @@ export function uninstallCommand(dir: string, options: UninstallOptions = {}): P
 function askRemoveAiContext(aiContextFiles: readonly string[]): Promise<boolean>
 ```
 
+### function `askRemoveRootDocs`
+
+```typescript
+function askRemoveRootDocs(rootDocs: readonly string[]): Promise<boolean>
+```
+
 ### function `countFiles`
 
 ```typescript
@@ -28,3 +34,4 @@ function countFiles(dir: string): number
 
 **Members:**
 - `removeAiContext`
+- `removeRootDocs`

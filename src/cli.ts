@@ -96,13 +96,16 @@ export function runCLI(argv: string[] = process.argv): void {
 
   program
     .command('uninstall')
-    .description('Remove all CDD artifacts (.cdd/, ARCHITECTURE.md, docs/) from project')
+    .description('Remove CDD artifacts from project')
     .argument('[directory]', 'Project directory', '.')
     .option('--remove-ai-context', 'Remove CDD managed blocks from AI instruction files without prompting')
     .option('--keep-ai-context', 'Keep CDD managed blocks in AI instruction files without prompting')
-    .action(exitOnError(async (dir: string, opts: { removeAiContext?: boolean; keepAiContext?: boolean }) => {
+    .option('--remove-root-docs', 'Remove DESIGN.md and CHANGELOG.md without prompting')
+    .option('--keep-root-docs', 'Keep DESIGN.md and CHANGELOG.md without prompting')
+    .action(exitOnError(async (dir: string, opts: { removeAiContext?: boolean; keepAiContext?: boolean; removeRootDocs?: boolean; keepRootDocs?: boolean }) => {
       await uninstallCommand(dir, {
         removeAiContext: opts.removeAiContext ? true : opts.keepAiContext ? false : undefined,
+        removeRootDocs: opts.removeRootDocs ? true : opts.keepRootDocs ? false : undefined,
       });
     }));
 

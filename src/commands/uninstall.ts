@@ -6,6 +6,7 @@ import { findAiContextFiles, removeAiContext } from '../core/ai-context.js';
 
 interface UninstallOptions {
   readonly removeAiContext?: boolean;
+  readonly removeRootDocs?: boolean;
 }
 
 export async function uninstallCommand(dir: string, options: UninstallOptions = {}): Promise<void> {
@@ -15,23 +16,39 @@ export async function uninstallCommand(dir: string, options: UninstallOptions = 
     throw new Error(`Directory not found: ${targetDir}`);
   }
 
-  const targets: { path: string; label: string }[] = [
+  const alwaysRemoveTargets: { path: string; label: string }[] = [
     { path: path.join(targetDir, '.cdd'), label: '.cdd/' },
     { path: path.join(targetDir, 'ARCHITECTURE.md'), label: 'ARCHITECTURE.md' },
-    { path: path.join(targetDir, 'DESIGN.md'), label: 'DESIGN.md' },
-    { path: path.join(targetDir, 'CHANGELOG.md'), label: 'CHANGELOG.md' },
     { path: path.join(targetDir, 'docs'), label: 'docs/' },
   ];
+  const rootDocTargets: { path: string; label: string }[] = [
+    { path: path.join(targetDir, 'DESIGN.md'), label: 'DESIGN.md' },
+    { path: path.join(targetDir, 'CHANGELOG.md'), label: 'CHANGELOG.md' },
+  ];
 
-  const existing = targets.filter((t) => fs.existsSync(t.path));
+  const existingAlwaysRemove = alwaysRemoveTargets.filter((t) => fs.existsSync(t.path));
+  const existingRootDocs = rootDocTargets.filter((t) => fs.existsSync(t.path));
   const aiContextFiles = findAiContextFiles(targetDir);
 
-  if (existing.length === 0 && aiContextFiles.length === 0) {
+  if (existingAlwaysRemove.length === 0 && existingRootDocs.length === 0 && aiContextFiles.length === 0) {
     console.log(chalk.yellow('No CDD artifacts found in this project.'));
     return;
   }
 
   console.log(chalk.cyan.bold('\nCDD uninstall'));
+
+  const shouldRemoveRootDocs =
+    existingRootDocs.length > 0
+      ? options.removeRootDocs ?? await askRemoveRootDocs(existingRootDocs.map((target) => target.label))
+      : false;
+  const existing = shouldRemoveRootDocs
+    ? [...existingAlwaysRemove, ...existingRootDocs]
+    : existingAlwaysRemove;
+
+  if (!shouldRemoveRootDocs && existingRootDocs.length > 0) {
+    console.log(chalk.dim(`  • Root generated docs kept: ${existingRootDocs.map((target) => target.label).join(', ')}`));
+  }
+
   console.log(chalk.cyan('The following generated artifacts will be removed:'));
   for (const t of existing) {
     const stat = fs.statSync(t.path);
@@ -81,6 +98,23 @@ async function askRemoveAiContext(aiContextFiles: readonly string[]): Promise<bo
     options: [
       { value: false, label: 'No', hint: 'Keep AI assistant routing instructions' },
       { value: true, label: 'Yes', hint: 'Remove only the managed CDD block' },
+    ],
+  });
+
+  if (isCancel(answer)) {
+    cancel('CDD uninstall cancelled.');
+    return false;
+  }
+
+  return answer;
+}
+
+async function askRemoveRootDocs(rootDocs: readonly string[]): Promise<boolean> {
+  const answer = await select({
+    message: `Remove root generated docs too? (${rootDocs.join(', ')})`,
+    options: [
+      { value: false, label: 'No', hint: 'Keep files that may contain human edits' },
+      { value: true, label: 'Yes', hint: 'Remove these generated docs too' },
     ],
   });
 

@@ -37,7 +37,7 @@
 | `reviewCommand` | `src/commands/review.ts:44` | dir: string, options: ReviewOptions | Promise<void> |
 | `specCommand` | `src/commands/spec.ts:8` | dir: string, options: { output?: string; full?: boolean; includeTests?: boolean } | Promise<void> |
 | `syncCommand` | `src/commands/sync.ts:10` | dir: string, options: { output?: string; includeTests?: boolean } = {} | Promise<void> |
-| `uninstallCommand` | `src/commands/uninstall.ts:11` | dir: string, options: UninstallOptions = {} | Promise<void> |
+| `uninstallCommand` | `src/commands/uninstall.ts:12` | dir: string, options: UninstallOptions = {} | Promise<void> |
 | `updateCommand` | `src/commands/update.ts:9` | _dir: string, options: { check?: boolean } = {} | Promise<void> |
 | `verifyCommand` | `src/commands/verify.ts:26` | dir: string, options: VerifyCommandOptions = {} | Promise<void> |
 | `findAiContextFiles` | `src/core/ai-context.ts:22` | projectDir: string | readonly string[] |

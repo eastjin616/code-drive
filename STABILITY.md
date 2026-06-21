@@ -21,7 +21,7 @@ The following commands are stable in `1.x`:
 | `cdd verify [directory]` | Checks setup, generated artifact freshness, AI routing, and review errors. |
 | `cdd doctor [directory]` | Reports local environment and project setup diagnostics. |
 | `cdd ai install [directory]` | Installs or refreshes CDD context routing in AI instruction files. |
-| `cdd uninstall [directory]` | Removes generated CDD artifacts and optionally removes managed AI context routing. |
+| `cdd uninstall [directory]` | Removes generated CDD artifacts; root docs such as `DESIGN.md` and `CHANGELOG.md` require confirmation unless a keep/remove flag is provided. |
 
 Adding new commands, options, checks, or generated sections is allowed in `1.x` when existing behavior remains compatible. Removing commands, renaming options, changing default target directories, or changing the meaning of an existing status is a breaking change.
 
