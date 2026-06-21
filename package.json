@@ -1,7 +1,7 @@
 {
   "name": "@eastjin616/code-drive",
-  "version": "0.2.0",
-  "description": "Code-Driven Development (CDD) CLI — Code is the single source of truth. Specs, docs, and architecture are derived from code, not the other way around.",
+  "version": "0.3.0",
+  "description": "Code Drive — a CLI for Code-Driven Development. Turn code into docs, architecture context, changelogs, and AI-ready prompt packs.",
   "type": "module",
   "bin": {
     "cdd": "dist/cli.js"
@@ -37,7 +37,7 @@
     "chalk": "^5.3.0",
     "chokidar": "^5.0.0",
     "commander": "^12.0.0",
-    "glob": "^11.0.0",
+    "glob": "^13.0.6",
     "ora": "^9.4.0",
     "typescript": "^5.6.0"
   },
@@ -48,9 +48,9 @@
     "prettier": "^3.4.0",
     "tsx": "^4.19.0",
     "typescript-eslint": "^8.0.0",
-    "vitest": "^2.1.0"
+    "vitest": "^4.1.9"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.19.0"
   }
 }

@@ -17,7 +17,7 @@ export function showBanner(): void {
   console.log(chalk.cyan.bold('   ██║     ██║  ██║██║  ██║'));
   console.log(chalk.cyan.bold('   ╚██████╗██████╔╝██████╔╝'));
   console.log(chalk.cyan.bold('    ╚═════╝╚═════╝ ╚═════╝ '));
-  console.log(chalk.dim('   Code-Driven Development'));
+  console.log(chalk.dim('   Code Drive'));
   console.log('');
 }
 

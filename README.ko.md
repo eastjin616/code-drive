@@ -3,9 +3,9 @@
   <a href="README.ko.md"><img src="https://img.shields.io/badge/🇰🇷-한국어-red?style=for-the-badge" alt="한국어"></a>
 </p>
 
-# Code-Driven Development (CDD)
+# Code Drive
 
-> **코드가 유일한 진실 공급원(Single Source of Truth)입니다.** 스펙, 문서, 아키텍처는 모두 코드에서 파생되며, 그 반대가 아닙니다.
+> Code-Driven Development를 위한 CLI입니다. 코드베이스에서 문서, 아키텍처 맥락, 체인지로그, AI용 프롬프트 팩을 생성합니다.
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -17,13 +17,24 @@
 
 ---
 
+```bash
+npm install -g @eastjin616/code-drive
+cdd verify
+cdd sync
+cdd prompt
+```
+
+`Code Drive`는 제품 이름입니다. `Code-Driven Development`는 방법론이고, `cdd`는 터미널에서 실행하는 짧은 명령어입니다.
+
+Code Drive는 초기 공개 사용에 맞춰 준비된 상태입니다. `0.x` 릴리스 라인은 향후 `1.0` 안정성 계약 전까지 CLI와 워크플로를 다듬을 여지를 둡니다.
+
 ## 왜 만들었나
 
 AI는 코드를 빠르게 만들 수 있습니다. 하지만 프로젝트 맥락은 여전히 소스 파일, 생성 문서, 체인지로그, AI 지침 파일 여기저기에 흩어져 있습니다. Codex나 Claude Code 같은 에이전트 런타임은 `AGENTS.md`, `CODEX.md`, `CLAUDE.md`, `CHANGELOG.md`를 자동으로 읽을 수 있지만, ChatGPT/Claude/Gemini 웹에 직접 프롬프트를 붙여넣는 사용자는 그렇지 않습니다. 무엇을 붙여넣어야 하는지, 어디까지 설명해야 하는지, AI가 없는 API를 지어내지 않게 하려면 어떻게 해야 하는지 매번 직접 판단해야 합니다.
 
-**Code-Driven Development (CDD)** 는 코드베이스 자체를 문서, 아키텍처, 체인지로그 맥락, 복붙용 프롬프트의 출처로 삼기 위해 만들었습니다. 사람이 별도 스펙을 계속 관리하는 대신, 실제 구현에서 작업 맥락을 파생합니다.
+**Code Drive**는 코드베이스 자체를 문서, 아키텍처, 체인지로그 맥락, 복붙용 프롬프트의 출처로 삼기 위해 만들었습니다. 사람이 별도 스펙을 계속 관리하는 대신, 실제 구현에서 작업 맥락을 파생합니다.
 
-CDD는 이 관계를 역전시켜 문제를 해결합니다:
+Code-Driven Development(CDD) 방법론은 이 관계를 역전시켜 문제를 해결합니다:
 
 | 전통적 방식 (Spec-Driven) | 코드 중심 (CDD) |
 |--------------------------|-------------------|
@@ -32,7 +43,7 @@ CDD는 이 관계를 역전시켜 문제를 해결합니다:
 | 아키텍처는 ADR에 존재 | 아키텍처는 코드 구조에 인코딩됨 |
 | 여러 개의 진실 공급원 | **단일 진실 공급원: 코드** |
 
-CDD는 **개발자 도구**이자 **방법론**입니다:
+Code Drive는 그 방법론을 구현하는 **개발자 도구**입니다:
 1. **문서 부동화(Drift) 제거** — 실제 소스 코드의 AST 분석으로 문서 생성
 2. **프롬프트만 쓰는 AI 사용자 지원** — `cdd prompt`가 ChatGPT, Claude, Gemini에 붙여넣을 프로젝트 브리프를 생성
 3. **AI 네이티브 워크플로 지원** — `cdd ai install`이 생성 문서를 AI 시작 문서에 연결
@@ -82,7 +93,7 @@ $ cdd
    ██║     ██║  ██║██║  ██║
    ╚██████╗██████╔╝██████╔╝
     ╚═════╝╚═════╝ ╚═════╝ 
-   Code-Driven Development
+   Code Drive
 
 ? 실행할 명령어를 선택하세요 (Use arrow keys)
 Project dashboard
@@ -151,7 +162,7 @@ npm install -g @eastjin616/code-drive
 npx @eastjin616/code-drive <command>
 ```
 
-**요구사항:** Node.js 18+
+**요구사항:** Node.js 20.19+
 
 ---
 

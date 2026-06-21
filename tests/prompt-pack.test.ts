@@ -41,7 +41,7 @@ describe('generatePromptPack', () => {
     expect(output).toContain('Goal: <describe what you want the AI to help with>');
     expect(output).toContain('ARCHITECTURE.md');
     expect(output).toContain('CHANGELOG.md');
-    expect(output).toContain('## Generated CDD Artifacts');
+    expect(output).toContain('## Generated Code Drive Artifacts');
     expect(output).toContain('ARCHITECTURE.md: generated');
     expect(output).toContain('Code is the source of truth');
     expect(output).toContain('Explain this project to me as a new maintainer.');

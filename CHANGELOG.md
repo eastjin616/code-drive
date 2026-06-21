@@ -1,4 +1,4 @@
-## [HEAD] — 2026-06-20
+## [0.3.0] — 2026-06-21
 
 ### Added
 
@@ -88,6 +88,10 @@
 
 ### Other
 
+- Polish prompt docs and Korean TUI status labels
+  → README.ko.md, README.md, docs/api/src--tui-status.md, src/core/ai-context.ts, src/tui-status.ts, src/tui-view.ts, tests/ai-context.test.ts, tests/tui-status.test.ts
+- Refresh generated CDD artifacts after feature split
+  → ARCHITECTURE.md, CHANGELOG.md, docs/README.md, docs/api/src--commands--prompt.md, docs/api/src--core--analyzer.md, docs/api/src--core--prompt-pack.md, docs/api/src--core--shell-alias.md
 - Keep local agent runtime state out of git
   → .gitignore
 - Document the visible agent harness workflow

@@ -76,10 +76,10 @@ function readProjectName(projectDir: string): string {
 }
 
 function verifyNode(): VerifyCheck {
-  const nodeMajor = Number.parseInt(process.versions.node.split('.')[0] ?? '0', 10);
-  return nodeMajor >= 18
+  const [nodeMajor = 0, nodeMinor = 0] = process.versions.node.split('.').map(Number);
+  return nodeMajor > 20 || (nodeMajor === 20 && nodeMinor >= 19)
     ? pass('node-version', `Node.js v${process.versions.node}`)
-    : fail('node-version', `Node.js v${process.versions.node} is below 18`);
+    : fail('node-version', `Node.js v${process.versions.node} is below 20.19`);
 }
 
 function verifyGit(projectDir: string): VerifyCheck[] {

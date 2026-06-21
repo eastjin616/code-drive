@@ -18,7 +18,7 @@ import { verifyCommand } from './commands/verify.js';
 import { promptCommand } from './commands/prompt.js';
 import { runTUI } from './tui.js';
 
-const pkg = { version: '0.2.0', name: 'code-drive' };
+const pkg = { version: '0.3.0', name: 'code-drive' };
 
 function exitOnError<TArgs extends unknown[]>(fn: (...args: TArgs) => Promise<void>) {
   return async (...args: TArgs) => {
@@ -48,8 +48,8 @@ export function runCLI(argv: string[] = process.argv): void {
   const program = new Command();
 
   program
-    .name(pkg.name)
-    .description(chalk.cyan('Code-Driven Development (CDD) — Code is the single source of truth.'))
+    .name('cdd')
+    .description(chalk.cyan('Code Drive — a CLI for Code-Driven Development.'))
     .version(pkg.version)
     .option('--cli', 'Force legacy CLI mode (skip TUI)');
 

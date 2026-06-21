@@ -145,7 +145,7 @@ export function generatePromptPack(projectDir: string, options: PromptPackOption
     '',
     'If you can attach or paste files, prioritize README.md, ARCHITECTURE.md, CHANGELOG.md, docs/README.md, and the source files related to your question.',
     '',
-    '## Generated CDD Artifacts',
+    '## Generated Code Drive Artifacts',
     '',
     ...generatedArtifactLines(targetDir),
     '',

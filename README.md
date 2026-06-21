@@ -3,9 +3,9 @@
   <a href="README.ko.md"><img src="https://img.shields.io/badge/🇰🇷-한국어-blue?style=for-the-badge" alt="한국어"></a>
 </p>
 
-# Code-Driven Development (CDD)
+# Code Drive
 
-> **Code is the single source of truth.** Specs, docs, and architecture are derived from code, not the other way around.
+> A CLI for Code-Driven Development. Turn your codebase into generated docs, architecture context, changelogs, and AI-ready prompt packs.
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -17,13 +17,24 @@
 
 ---
 
+```bash
+npm install -g @eastjin616/code-drive
+cdd verify
+cdd sync
+cdd prompt
+```
+
+`Code Drive` is the product name. `Code-Driven Development` is the methodology. `cdd` is the short command you run in the terminal.
+
+Code Drive is ready for early public use. The `0.x` release line keeps room for CLI and workflow refinement before a future `1.0` stability contract.
+
 ## Why This Exists
 
 AI can write code quickly, but it still struggles when the project context is scattered across source files, generated docs, changelogs, and AI instruction files. Agent runtimes can sometimes read `AGENTS.md`, `CODEX.md`, `CLAUDE.md`, or `CHANGELOG.md` automatically. Prompt-only users cannot rely on that. They have to decide what to paste, how much context to include, and how to keep the AI grounded.
 
-**Code-Driven Development (CDD)** exists to turn the codebase itself into the source for docs, architecture, changelog context, and copy-paste prompts. Instead of asking humans to maintain separate specs, CDD derives the working context from the implementation.
+**Code Drive** exists to turn the codebase itself into the source for docs, architecture, changelog context, and copy-paste prompts. Instead of asking humans to maintain separate specs, Code Drive derives the working context from the implementation.
 
-CDD solves this by inverting the relationship:
+The Code-Driven Development (CDD) methodology solves this by inverting the relationship:
 
 | Traditional (Spec-Driven) | Code-Driven (CDD) |
 |--------------------------|-------------------|
@@ -32,7 +43,7 @@ CDD solves this by inverting the relationship:
 | Architecture lives in ADRs | Architecture is encoded in code structure |
 | Multiple sources of truth | **Single source of truth: code** |
 
-CDD is a **developer tool** and **methodology** that:
+Code Drive is a **developer tool** for that methodology:
 1. **Eliminates documentation drift** — Docs are generated from AST analysis of actual source code
 2. **Helps prompt-only AI users** — `cdd prompt` creates a copy-paste brief for ChatGPT, Claude, Gemini, and similar tools
 3. **Enables AI-native workflows** — `cdd ai install` wires generated docs into agent instruction files
@@ -82,7 +93,7 @@ $ cdd
    ██║     ██║  ██║██║  ██║
    ╚██████╗██████╔╝██████╔╝
     ╚═════╝╚═════╝ ╚═════╝ 
-   Code-Driven Development
+   Code Drive
 
 ? 실행할 명령어를 선택하세요 (Use arrow keys)
 Project dashboard
@@ -151,7 +162,7 @@ npm install -g @eastjin616/code-drive
 npx @eastjin616/code-drive <command>
 ```
 
-**Requirements:** Node.js 18+
+**Requirements:** Node.js 20.19+
 
 ---
 
