@@ -7,7 +7,7 @@
 - **Source files:** 43
 - **Entry points:** src/cli.ts
 - **Dependencies:** 7
-- **Exported functions:** 68
+- **Exported functions:** 69
 - **Exported classes:** 0
 - **Exported interfaces:** 40
 

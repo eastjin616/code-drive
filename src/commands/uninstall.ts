@@ -18,6 +18,8 @@ export async function uninstallCommand(dir: string, options: UninstallOptions = 
   const targets: { path: string; label: string }[] = [
     { path: path.join(targetDir, '.cdd'), label: '.cdd/' },
     { path: path.join(targetDir, 'ARCHITECTURE.md'), label: 'ARCHITECTURE.md' },
+    { path: path.join(targetDir, 'DESIGN.md'), label: 'DESIGN.md' },
+    { path: path.join(targetDir, 'CHANGELOG.md'), label: 'CHANGELOG.md' },
     { path: path.join(targetDir, 'docs'), label: 'docs/' },
   ];
 

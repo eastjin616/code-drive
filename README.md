@@ -28,6 +28,8 @@ cdd prompt
 
 Code Drive is ready for early public use. The `0.x` release line keeps room for CLI and workflow refinement before a future `1.0` stability contract.
 
+For the planned `1.x` compatibility boundary, see [STABILITY.md](STABILITY.md).
+
 ## Why This Exists
 
 AI can write code quickly, but it still struggles when the project context is scattered across source files, generated docs, changelogs, and AI instruction files. Agent runtimes can sometimes read `AGENTS.md`, `CODEX.md`, `CLAUDE.md`, or `CHANGELOG.md` automatically. Prompt-only users cannot rely on that. They have to decide what to paste, how much context to include, and how to keep the AI grounded.

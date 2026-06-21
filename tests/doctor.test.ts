@@ -5,7 +5,7 @@ import { execSync } from 'node:child_process';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { generateAiContextBlock } from '../src/core/ai-context.js';
 import { generateCddConfig } from '../src/core/cdd-config-generator.js';
-import { doctorCommand } from '../src/commands/doctor.js';
+import { doctorCommand, isSupportedNodeVersion } from '../src/commands/doctor.js';
 
 const originalHome = process.env.HOME;
 
@@ -38,6 +38,13 @@ function makeDoctorProject(): string {
 }
 
 describe('doctorCommand', () => {
+  it('uses Node.js 20.19 as the support floor', () => {
+    expect(isSupportedNodeVersion('18.20.8')).toBe(false);
+    expect(isSupportedNodeVersion('20.18.1')).toBe(false);
+    expect(isSupportedNodeVersion('20.19.0')).toBe(true);
+    expect(isSupportedNodeVersion('22.0.0')).toBe(true);
+  });
+
   it('warns when the active shell config aliases cdd to another checkout', async () => {
     const projectDir = makeDoctorProject();
     const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cdd-home-'));

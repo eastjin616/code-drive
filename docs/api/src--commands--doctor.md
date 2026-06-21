@@ -34,6 +34,12 @@ function info(msg: string): Check
 function addRecommendation(recommendations: string[], message: string): void
 ```
 
+### export function `isSupportedNodeVersion`
+
+```typescript
+export function isSupportedNodeVersion(version: string): boolean
+```
+
 ### export function `doctorCommand`
 
 ```typescript

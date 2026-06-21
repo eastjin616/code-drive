@@ -30,7 +30,8 @@
 | `designCommand` | `src/commands/design.ts:9` | dir: string, options: { output?: string } | Promise<void> |
 | `generateDocs` | `src/commands/docgen.ts:12` | targetDir: string, outputDir: string, options: AnalysisScopeOptions = {} | DocResult[] |
 | `docgenCommand` | `src/commands/docgen.ts:58` | dir: string, options: { output?: string; watch?: boolean; includeTests?: boolean } | Promise<void> |
-| `doctorCommand` | `src/commands/doctor.ts:39` | dir: string, options: DoctorOptions = {} | Promise<void> |
+| `isSupportedNodeVersion` | `src/commands/doctor.ts:39` | version: string | boolean |
+| `doctorCommand` | `src/commands/doctor.ts:44` | dir: string, options: DoctorOptions = {} | Promise<void> |
 | `initCommand` | `src/commands/init.ts:8` | dir: string, options: { force?: boolean } | Promise<void> |
 | `promptCommand` | `src/commands/prompt.ts:9` | dir: string, options: PromptCommandOptions = {} | Promise<void> |
 | `reviewCommand` | `src/commands/review.ts:44` | dir: string, options: ReviewOptions | Promise<void> |

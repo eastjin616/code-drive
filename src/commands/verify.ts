@@ -33,6 +33,7 @@ export async function verifyCommand(
   }
 
   const result = verifyProject(targetDir, { includeTests: options.includeTests });
+  process.exitCode = result.status === 'ready' ? undefined : 1;
 
   if (options.json) {
     console.log(JSON.stringify(result, null, 2));

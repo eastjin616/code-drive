@@ -36,6 +36,11 @@ function addRecommendation(recommendations: string[], message: string): void {
   if (!recommendations.includes(message)) recommendations.push(message);
 }
 
+export function isSupportedNodeVersion(version: string): boolean {
+  const [major = 0, minor = 0] = version.split('.').map(Number);
+  return major > 20 || (major === 20 && minor >= 19);
+}
+
 export async function doctorCommand(dir: string, options: DoctorOptions = {}): Promise<void> {
   const targetDir = path.resolve(dir);
   const analysisOptions: AnalysisScopeOptions = { includeTests: options.includeTests };
@@ -52,11 +57,10 @@ export async function doctorCommand(dir: string, options: DoctorOptions = {}): P
 
   // Node version
   const nodeVer = process.versions.node;
-  const nodeMajor = parseInt(nodeVer.split('.')[0], 10);
-  if (nodeMajor >= 18) {
-    checks.push(ok(`Node.js v${nodeVer} (≥18)`));
+  if (isSupportedNodeVersion(nodeVer)) {
+    checks.push(ok(`Node.js v${nodeVer} (>=20.19)`));
   } else {
-    checks.push(fail(`Node.js v${nodeVer} (<18) — upgrade required`));
+    checks.push(fail(`Node.js v${nodeVer} (<20.19) — upgrade required`));
   }
 
   // Git availability
